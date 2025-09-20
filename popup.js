@@ -1,7 +1,6 @@
 // Popup JavaScript for Price Rounder Extension
 document.addEventListener('DOMContentLoaded', function() {
     const toggleSwitch = document.getElementById('toggleSwitch');
-    const ecommerceToggle = document.getElementById('ecommerceToggle');
     const statusElement = document.getElementById('status');
     const statusText = document.getElementById('statusText');
     const refreshNotice = document.getElementById('refreshNotice');
@@ -49,42 +48,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // E-commerce toggle click handler
-    ecommerceToggle.addEventListener('click', function() {
-        const isCurrentlyActive = ecommerceToggle.classList.contains('active');
-        const newState = !isCurrentlyActive;
-        
-        // Update UI immediately
-        updateEcommerceToggleState(newState);
-        
-        // Save to storage
-        chrome.storage.sync.set({
-            priceEcommerceMode: newState
-        }, function() {
-            console.log('E-commerce mode saved:', newState);
-        });
-
-        // Send message to content script
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            if (tabs[0]) {
-                chrome.tabs.sendMessage(tabs[0].id, {
-                    action: 'setEcommerceMode',
-                    enabled: newState
-                }, function(response) {
-                    if (chrome.runtime.lastError) {
-                        console.log('Content script not ready:', chrome.runtime.lastError.message);
-                        showRefreshNotice();
-                    } else if (response && response.success) {
-                        console.log('E-commerce mode updated successfully');
-                        hideRefreshNotice();
-                    } else {
-                        console.log('E-commerce mode update failed');
-                        showRefreshNotice();
-                    }
-                });
-            }
-        });
-    });
     roundingModeRadios.forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.checked) {
@@ -123,13 +86,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function loadCurrentState() {
         // Load from storage
-        chrome.storage.sync.get(['priceRounderEnabled', 'priceRoundingMode', 'priceEcommerceMode'], function(result) {
+        chrome.storage.sync.get(['priceRounderEnabled', 'priceRoundingMode'], function(result) {
             const isEnabled = result.priceRounderEnabled !== false; // Default to true
             const roundingMode = result.priceRoundingMode || 'nearest'; // Default to nearest
-            const ecommerceMode = result.priceEcommerceMode !== false; // Default to true
             
             updateToggleState(isEnabled);
-            updateEcommerceToggleState(ecommerceMode);
             updateStatus(isEnabled);
             updateRoundingMode(roundingMode);
             updateExamples(roundingMode);
@@ -149,9 +110,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (response.roundingMode) {
                                 updateRoundingMode(response.roundingMode);
                                 updateExamples(response.roundingMode);
-                            }
-                            if (response.ecommerceMode !== undefined) {
-                                updateEcommerceToggleState(response.ecommerceMode);
                             }
                             hideRefreshNotice();
                         }

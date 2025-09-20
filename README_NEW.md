@@ -4,20 +4,19 @@ A Microsoft Edge extension that rounds prices on e-commerce and shopping website
 
 ## Features
 
-### 🎯 Intelligent Price Detection
+### 🎯 Price Detection Modes
 - **Regular Text Detection**: Finds and rounds prices in regular text content (e.g., "$19.99", "€24.95")
-- **Automatic E-commerce Detection**: Automatically detects e-commerce sites and enables specialized processing
-- **Structured Price Support**: Handles complex HTML price structures on Amazon, Temu, and other major sites
+- **E-commerce Mode**: Specialized detection for major e-commerce sites with structured HTML pricing
 
 ### 🔧 Rounding Options
 - **Nearest Dollar**: Rounds to the nearest whole number (always rounds UP)
 - **Multiple of 5**: Rounds to the nearest multiple of 5 (always rounds UP)
 - **Multiple of 10**: Rounds to the nearest multiple of 10 (always rounds UP)
 
-### 🛍️ Automatic E-commerce Detection
-- **Domain Recognition**: Recognizes major e-commerce domains (Amazon, eBay, Walmart, Target, etc.)
-- **Content Analysis**: Scans page structure for shopping indicators (price classes, cart buttons, product containers)
-- **Seamless Operation**: No manual configuration needed - automatically enables appropriate processing
+### 🛍️ Supported E-commerce Sites
+- **Amazon**: Handles Amazon's structured pricing with separate elements for dollars and cents
+- **Temu**: Supports Temu's pricing structure with integer and cent components
+- **Extensible**: Easy to add support for other major e-commerce platforms
 
 ## Installation
 
@@ -31,14 +30,14 @@ A Microsoft Edge extension that rounds prices on e-commerce and shopping website
 
 ### Basic Usage
 1. Click the extension icon in the toolbar to open the popup
-2. Toggle "Round Prices" to activate/deactivate the extension
+2. Toggle "Enable Price Rounding" to activate/deactivate the extension
 3. Select your preferred rounding mode (Nearest, Multiple of 5, or Multiple of 10)
-4. Browse any website - prices will be automatically rounded on e-commerce sites
+4. Browse any shopping website - prices will be automatically rounded
 
-### Automatic Detection
-- **E-commerce sites**: Both text and structured prices are processed automatically
-- **Regular websites**: Only text prices are processed
-- **No manual configuration**: The extension intelligently determines the appropriate detection method
+### E-commerce Mode
+1. Toggle "Enable E-commerce Mode" for better support of structured pricing on major sites
+2. This mode specifically targets Amazon, Temu, and other sites with complex HTML price structures
+3. Can be used alongside or instead of regular text detection
 
 ### Settings Persistence
 - All settings are automatically saved and restored when you restart the browser
@@ -92,10 +91,8 @@ pricerounding_extension/
 ### Testing
 Use the included test files:
 - `debug.html` - Basic price detection testing
-- `ecommerce-test.html` - E-commerce structured price testing  
+- `ecommerce-test.html` - E-commerce structured price testing
 - `ecommerce-complete-test.html` - Comprehensive testing with all features
-- `auto-ecommerce-test.html` - Automatic detection verification
-- `fractional-test.html` - Verify ".00" fractional part display
 
 ### Adding New E-commerce Sites
 To add support for a new e-commerce site, modify the `ecommerceConfigs` object in `content.js`:
@@ -112,8 +109,6 @@ ecommerceConfigs['newsite.com'] = {
 
 ## Version History
 
-- **v1.4.1**: Fixed fractional part display to always show ".00" for rounded prices
-- **v1.4.0**: Automatic e-commerce detection - removed manual toggle, intelligent site recognition
 - **v1.3.0**: Added e-commerce mode with Amazon and Temu support
 - **v1.2.0**: Added multiple rounding options (5, 10) and improved UI
 - **v1.1.0**: Added rounding mode selection and settings persistence

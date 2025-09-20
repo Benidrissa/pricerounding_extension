@@ -6,9 +6,57 @@
 
     let isEnabled = true;
     let roundingMode = 'nearest'; // 'nearest', 'multiple5', 'multiple10'
-    let ecommerceMode = true; // Enable structured price detection for major e-commerce sites
     let originalPrices = new Map(); // Store original prices for restoration
     let isInitialized = false;
+
+    // Function to detect if current site is an e-commerce site
+    function isEcommerceSite() {
+        const hostname = window.location.hostname.toLowerCase();
+        console.log('Price Rounder: Checking if site is e-commerce:', hostname);
+        
+        // Check for known e-commerce domains
+        const ecommerceDomains = [
+            'amazon.com', 'amazon.ca', 'amazon.co.uk', 'amazon.de', 'amazon.fr', 'amazon.it', 'amazon.es', 'amazon.com.au', 'amazon.co.jp',
+            'temu.com',
+            'ebay.com', 'ebay.ca', 'ebay.co.uk', 'ebay.de', 'ebay.fr', 'ebay.it', 'ebay.es', 'ebay.com.au',
+            'walmart.com', 'target.com', 'bestbuy.com', 'costco.com', 'homedepot.com', 'lowes.com',
+            'aliexpress.com', 'alibaba.com', 'shopify.com',
+            'etsy.com', 'wayfair.com', 'overstock.com', 'newegg.com', 'tigerdirect.com',
+            'macys.com', 'nordstrom.com', 'kohls.com', 'jcpenney.com', 'sears.com',
+            'zappos.com', 'nike.com', 'adidas.com', 'rei.com', 'dickssportinggoods.com'
+        ];
+        
+        // Check if hostname matches any known e-commerce domain
+        const isKnownEcommerce = ecommerceDomains.some(domain => 
+            hostname === domain || hostname.endsWith('.' + domain)
+        );
+        
+        if (isKnownEcommerce) {
+            console.log('Price Rounder: Detected known e-commerce site');
+            return true;
+        }
+        
+        // Check for e-commerce indicators in the page structure
+        const ecommerceIndicators = [
+            '.a-price', // Amazon
+            '[data-type="price"]', // Temu
+            '.price', '.product-price', '.cost', '.amount',
+            '.cart', '.add-to-cart', '.buy-now', '.checkout',
+            '.product', '.item', '.goods'
+        ];
+        
+        const hasEcommerceElements = ecommerceIndicators.some(selector => 
+            document.querySelector(selector) !== null
+        );
+        
+        if (hasEcommerceElements) {
+            console.log('Price Rounder: Detected e-commerce indicators in page structure');
+            return true;
+        }
+        
+        console.log('Price Rounder: No e-commerce indicators detected');
+        return false;
+    }
 
     // Currency symbols and patterns
     const currencySymbols = ['$', '€', '£', '¥', '₹', '₽', '₩', 'R$', 'C$', 'A$', 'kr', 'zł', '₪', '₦'];
@@ -154,8 +202,14 @@
 
     // Main function to process structured e-commerce prices
     function processStructuredPrices() {
-        if (!isEnabled || !ecommerceMode) {
-            console.log('Price Rounder: E-commerce mode disabled, skipping structured prices');
+        if (!isEnabled) {
+            console.log('Price Rounder: Extension disabled, skipping structured prices');
+            return;
+        }
+        
+        // Automatically detect if this is an e-commerce site
+        if (!isEcommerceSite()) {
+            console.log('Price Rounder: Not an e-commerce site, skipping structured price processing');
             return;
         }
         
@@ -198,9 +252,9 @@
                 const originalPrice = parseFloat(`${whole}.${fraction}`);
                 const roundedPrice = getRoundedPrice(originalPrice);
                 const roundedWhole = Math.floor(roundedPrice);
-                const roundedFraction = Math.round((roundedPrice - roundedWhole) * 100);
+                const roundedFraction = "00"; // Always show 00 since we round to whole numbers
                 
-                console.log(`Price Rounder: Amazon ${symbol}${whole}.${fraction} → ${symbol}${roundedWhole}.${roundedFraction.toString().padStart(2, '0')}`);
+                console.log(`Price Rounder: Amazon ${symbol}${whole}.${fraction} → ${symbol}${roundedWhole}.${roundedFraction}`);
                 
                 // Store original for restoration
                 if (!originalPrices.has(priceElement)) {
@@ -213,8 +267,8 @@
                 }
                 
                 // Update the displayed price
-                wholeElement.textContent = roundedWhole + (wholeElement.textContent.includes('.') ? '.' : '');
-                fractionElement.textContent = roundedFraction.toString().padStart(2, '0');
+                wholeElement.textContent = roundedWhole.toString();
+                fractionElement.textContent = roundedFraction;
                 
                 // Update offscreen price for accessibility
                 if (offscreenElement) {
@@ -468,20 +522,12 @@
             }
             sendResponse({success: true});
         } else if (request.action === 'getStatus') {
-            const status = {enabled: isEnabled, roundingMode: roundingMode, ecommerceMode: ecommerceMode};
+            const status = {enabled: isEnabled, roundingMode: roundingMode, ecommerceSite: isEcommerceSite()};
             console.log('Price Rounder: Sending status:', status);
             sendResponse(status);
         } else if (request.action === 'setRoundingMode') {
             roundingMode = request.mode;
             console.log('Price Rounder: Rounding mode changed to', roundingMode);
-            if (isEnabled) {
-                restoreOriginalPrices();
-                processPricesOnPage();
-            }
-            sendResponse({success: true});
-        } else if (request.action === 'setEcommerceMode') {
-            ecommerceMode = request.enabled;
-            console.log('Price Rounder: E-commerce mode changed to', ecommerceMode);
             if (isEnabled) {
                 restoreOriginalPrices();
                 processPricesOnPage();
@@ -498,15 +544,14 @@
         isInitialized = true;
         
         // Load settings from storage
-        chrome.storage.sync.get(['priceRounderEnabled', 'priceRoundingMode', 'priceEcommerceMode'], function(result) {
+        chrome.storage.sync.get(['priceRounderEnabled', 'priceRoundingMode'], function(result) {
             isEnabled = result.priceRounderEnabled !== false; // Default to true
             roundingMode = result.priceRoundingMode || 'nearest'; // Default to nearest
-            ecommerceMode = result.priceEcommerceMode !== false; // Default to true
             
             console.log('Price Rounder: Settings loaded -', {
                 enabled: isEnabled,
                 roundingMode: roundingMode,
-                ecommerceMode: ecommerceMode
+                ecommerceSite: isEcommerceSite()
             });
             
             if (isEnabled) {

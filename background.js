@@ -4,8 +4,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
         // Set default settings on first install
         chrome.storage.sync.set({
             priceRounderEnabled: true,
-            priceRoundingMode: 'nearest',
-            priceEcommerceMode: true
+            priceRoundingMode: 'nearest'
         }, function() {
             console.log('Price Rounder extension installed with default settings');
         });
@@ -32,7 +31,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         (tab.url.startsWith('http://') || tab.url.startsWith('https://'))) {
         
         // Check if extension is enabled
-        chrome.storage.sync.get(['priceRounderEnabled', 'priceRoundingMode', 'priceEcommerceMode'], function(result) {
+        chrome.storage.sync.get(['priceRounderEnabled', 'priceRoundingMode'], function(result) {
             if (result.priceRounderEnabled !== false) {
                 // Extension is enabled, make sure content script is working
                 chrome.tabs.sendMessage(tabId, {action: 'getStatus'}, function(response) {

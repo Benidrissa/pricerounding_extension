@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto E-commerce Detection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #333;
+            border-bottom: 2px solid #007185;
+            padding-bottom: 10px;
+        }
+        .price-item {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+        }
+        /* Amazon-style pricing */
+        .a-price {
+            color: #B12704;
+            font-weight: normal;
+        }
+        .a-price-whole {
+            font-size: 28px;
+            font-weight: normal;
+        }
+        .a-price-fraction {
+            font-size: 13px;
+            vertical-align: top;
+            margin-left: 1px;
+        }
+        .a-price-symbol {
+            font-size: 21px;
+            vertical-align: top;
+        }
+        /* General e-commerce indicators */
+        .price {
+            color: #E47911;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .product-price {
+            color: #c45500;
+            font-size: 20px;
+        }
+        .add-to-cart {
+            background-color: #ff9900;
+            border: none;
+            border-radius: 3px;
+            color: #111;
+            cursor: pointer;
+            padding: 8px 16px;
+            margin: 10px 0;
+        }
+        .detection-status {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status-indicator {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛍️ Automatic E-commerce Detection Test</h1>
+    
+    <div class="detection-status">
+        <h3>🤖 Auto-Detection Status</h3>
+        <p>The extension will automatically detect that this page contains e-commerce elements and enable structured price processing.</p>
+        <p class="status-indicator">✅ This page should be detected as an e-commerce site</p>
+        <p><small>Check the browser console (F12) to see detection logs</small></p>
+    </div>
+
+    <div class="test-section">
+        <h2>E-commerce Indicators Present</h2>
+        <p>This page contains multiple e-commerce indicators that should trigger automatic detection:</p>
+        <ul>
+            <li><strong>Amazon price structure</strong> (.a-price elements)</li>
+            <li><strong>Generic price classes</strong> (.price, .product-price)</li>
+            <li><strong>Shopping elements</strong> (.add-to-cart buttons)</li>
+            <li><strong>Product structure</strong> (.product containers)</li>
+        </ul>
+    </div>
+
+    <!-- Amazon-style Structured Prices -->
+    <div class="test-section">
+        <h2>Amazon-style Structured Prices</h2>
+        <div class="price-item">
+            <span class="a-price">
+                <span class="a-price-symbol">$</span>
+                <span class="a-price-whole">19</span>
+                <span class="a-price-fraction">99</span>
+            </span>
+            <br><small>Should round to $20.00</small>
+            <br><button class="add-to-cart">Add to Cart</button>
+        </div>
+        <div class="price-item">
+            <span class="a-price">
+                <span class="a-price-symbol">$</span>
+                <span class="a-price-whole">89</span>
+                <span class="a-price-fraction">95</span>
+            </span>
+            <br><small>Should round to $90.00</small>
+            <br><button class="add-to-cart">Add to Cart</button>
+        </div>
+        <div class="price-item">
+            <span class="a-price">
+                <span class="a-price-symbol">$</span>
+                <span class="a-price-whole">149</span>
+                <span class="a-price-fraction">99</span>
+            </span>
+            <br><small>Should round to $150.00</small>
+            <br><button class="add-to-cart">Add to Cart</button>
+        </div>
+    </div>
+
+    <!-- Generic E-commerce Prices -->
+    <div class="test-section">
+        <h2>Generic E-commerce Prices</h2>
+        <div class="price-item">
+            <div class="product">
+                <h4>Product A</h4>
+                <span class="price">$24.99</span>
+                <br><button class="add-to-cart">Buy Now</button>
+            </div>
+        </div>
+        <div class="price-item">
+            <div class="product">
+                <h4>Product B</h4>
+                <span class="product-price">€39.95</span>
+                <br><button class="add-to-cart">Add to Cart</button>
+            </div>
+        </div>
+        <div class="price-item">
+            <div class="product">
+                <h4>Product C</h4>
+                <span class="price">£12.99</span>
+                <br><button class="add-to-cart">Purchase</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Regular Text Prices -->
+    <div class="test-section">
+        <h2>Regular Text Prices (Always Active)</h2>
+        <div class="price-item">
+            <p>Sale price: $29.99 (should round to $30.00)</p>
+        </div>
+        <div class="price-item">
+            <p>Special offer: €49.95 (should round to €50.00)</p>
+        </div>
+        <div class="price-item">
+            <p>Limited time: £199.99 (should round to £200.00)</p>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="test-section">
+        <h2>🔍 How Auto-Detection Works</h2>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-top: 10px;">
+            <h4>1. Domain Detection</h4>
+            <p>Checks if the current domain is a known e-commerce site (Amazon, eBay, Walmart, etc.)</p>
+            
+            <h4>2. Element Detection</h4>
+            <p>Scans the page for e-commerce indicators such as:</p>
+            <ul>
+                <li>Price-related classes: .price, .product-price, .a-price</li>
+                <li>Shopping elements: .cart, .add-to-cart, .buy-now</li>
+                <li>Product containers: .product, .item, .goods</li>
+            </ul>
+            
+            <h4>3. Automatic Activation</h4>
+            <p>When e-commerce indicators are found, structured price processing is automatically enabled alongside regular text price detection.</p>
+        </div>
+    </div>
+
+    <!-- Testing Instructions -->
+    <div class="test-section">
+        <h2>📝 Testing Instructions</h2>
+        <ol>
+            <li><strong>Install the extension</strong> and make sure it's enabled</li>
+            <li><strong>Open this page</strong> and check the extension popup - no e-commerce toggle should be visible</li>
+            <li><strong>Check browser console</strong> (F12 → Console) for detection logs</li>
+            <li><strong>Verify price rounding</strong> - both structured and text prices should be rounded</li>
+            <li><strong>Try different rounding modes</strong> (nearest, multiple of 5, multiple of 10)</li>
+            <li><strong>Test on non-e-commerce sites</strong> - structured processing should be skipped, but text prices should still work</li>
+        </ol>
+    </div>
+
+    <script>
+        // Add some debugging info
+        console.log('=== Auto E-commerce Detection Test Page ===');
+        console.log('Amazon-style price elements:', document.querySelectorAll('.a-price').length);
+        console.log('Generic price elements:', document.querySelectorAll('.price, .product-price').length);
+        console.log('Shopping elements:', document.querySelectorAll('.add-to-cart, .product').length);
+        console.log('Text prices found:', document.body.textContent.match(/[$€£¥]\d+\.\d{2}/g) || []);
+        
+        // Show current URL for reference
+        console.log('Current URL:', window.location.href);
+        console.log('Hostname:', window.location.hostname);
+    </script>
+</body>
+</html>

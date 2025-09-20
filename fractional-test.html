@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractional .00 Test - Price Rounder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .price-item {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            min-width: 120px;
+            text-align: center;
+        }
+        .original-price {
+            color: #666;
+            text-decoration: line-through;
+            font-size: 14px;
+        }
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin: 5px 0;
+        }
+        /* Amazon-style pricing */
+        .a-price {
+            color: #B12704;
+            font-weight: normal;
+            font-size: 24px;
+        }
+        .a-price-whole {
+            font-size: 28px;
+            font-weight: normal;
+        }
+        .a-price-fraction {
+            font-size: 13px;
+            vertical-align: top;
+            margin-left: 1px;
+        }
+        .a-price-symbol {
+            font-size: 21px;
+            vertical-align: top;
+        }
+        .verification {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>💰 Fractional Part ".00" Verification Test</h1>
+    
+    <div class="verification">
+        <h3>✅ Verification Goal</h3>
+        <p><strong>All rounded prices should show ".00" as the fractional part</strong></p>
+        <p>This test verifies that both regular text prices and structured e-commerce prices display ".00" after rounding.</p>
+    </div>
+
+    <!-- Regular Text Prices -->
+    <div class="test-section">
+        <h2>Regular Text Prices</h2>
+        <p><em>These prices should all show ".00" after rounding:</em></p>
+        
+        <div class="price-item">
+            <div class="original-price">Original: $9.99</div>
+            <div class="price">$9.99</div>
+            <small>Should become: $10.00</small>
+        </div>
+        
+        <div class="price-item">
+            <div class="original-price">Original: €19.95</div>
+            <div class="price">€19.95</div>
+            <small>Should become: €20.00</small>
+        </div>
+        
+        <div class="price-item">
+            <div class="original-price">Original: £24.50</div>
+            <div class="price">£24.50</div>
+            <small>Should become: £25.00</small>
+        </div>
+        
+        <div class="price-item">
+            <div class="original-price">Original: $149.99</div>
+            <div class="price">$149.99</div>
+            <small>Should become: $150.00</small>
+        </div>
+        
+        <div class="price-item">
+            <div class="original-price">Original: ¥2,999</div>
+            <div class="price">¥2,999.99</div>
+            <small>Should become: ¥3,000.00</small>
+        </div>
+    </div>
+
+    <!-- Amazon-style Structured Prices -->
+    <div class="test-section">
+        <h2>Amazon-style Structured Prices</h2>
+        <p><em>The ".fraction" element should show "00" after rounding:</em></p>
+        
+        <div class="price-item">
+            <div class="original-price">Original Structure</div>
+            <span class="a-price">
+                <span class="a-price-symbol">$</span>
+                <span class="a-price-whole">19</span>
+                <span class="a-price-fraction">99</span>
+            </span>
+            <br><small>Fraction should show: 00</small>
+        </div>
+        
+        <div class="price-item">
+            <div class="original-price">Original Structure</div>
+            <span class="a-price">
+                <span class="a-price-symbol">$</span>
+                <span class="a-price-whole">89</span>
+                <span class="a-price-fraction">95</span>
+            </span>
+            <br><small>Fraction should show: 00</small>
+        </div>
+        
+        <div class="price-item">
+            <div class="original-price">Original Structure</div>
+            <span class="a-price">
+                <span class="a-price-symbol">$</span>
+                <span class="a-price-whole">149</span>
+                <span class="a-price-fraction">99</span>
+            </span>
+            <br><small>Fraction should show: 00</small>
+        </div>
+        
+        <div class="price-item">
+            <div class="original-price">Original Structure</div>
+            <span class="a-price">
+                <span class="a-price-symbol">€</span>
+                <span class="a-price-whole">24</span>
+                <span class="a-price-fraction">50</span>
+            </span>
+            <br><small>Fraction should show: 00</small>
+        </div>
+    </div>
+
+    <!-- Mixed Content Test -->
+    <div class="test-section">
+        <h2>Mixed Content Test</h2>
+        <p><em>Both formats together - all should show ".00":</em></p>
+        
+        <div class="price-item">
+            <p>Text price: Starting at $12.99</p>
+            <span class="a-price">
+                <span class="a-price-symbol">$</span>
+                <span class="a-price-whole">12</span>
+                <span class="a-price-fraction">99</span>
+            </span>
+            <br><small>Both should end with .00</small>
+        </div>
+        
+        <div class="price-item">
+            <p>Sale: Was €49.99, now €39.95</p>
+            <span class="a-price">
+                <span class="a-price-symbol">€</span>
+                <span class="a-price-whole">39</span>
+                <span class="a-price-fraction">95</span>
+            </span>
+            <br><small>All prices should end with .00</small>
+        </div>
+    </div>
+
+    <!-- Testing Instructions -->
+    <div class="test-section">
+        <h2>🔍 How to Verify</h2>
+        <ol>
+            <li><strong>Load the extension</strong> and ensure it's enabled</li>
+            <li><strong>Refresh this page</strong> after enabling the extension</li>
+            <li><strong>Check all prices</strong> - they should all end with ".00"</li>
+            <li><strong>Try different rounding modes</strong>:
+                <ul>
+                    <li>Nearest: $19.99 → $20.00</li>
+                    <li>Multiple of 5: $19.99 → $20.00</li>
+                    <li>Multiple of 10: $19.99 → $20.00</li>
+                </ul>
+            </li>
+            <li><strong>For Amazon-style prices</strong>: The fraction part (after the decimal) should show "00"</li>
+            <li><strong>For text prices</strong>: The full price should end with ".00"</li>
+        </ol>
+    </div>
+
+    <!-- Expected Behavior -->
+    <div class="test-section">
+        <h2>✅ Expected Behavior</h2>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 4px;">
+            <h4>Text Prices:</h4>
+            <ul>
+                <li>$9.99 → $10.00 (not $10)</li>
+                <li>€19.95 → €20.00 (not €20)</li>
+                <li>£24.50 → £25.00 (not £25)</li>
+            </ul>
+            
+            <h4>Amazon Structured Prices:</h4>
+            <ul>
+                <li>$19<sup>99</sup> → $20<sup>00</sup></li>
+                <li>€24<sup>50</sup> → €25<sup>00</sup></li>
+                <li>The "fraction" element should always show "00"</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        console.log('=== Fractional .00 Test Page ===');
+        console.log('Text prices found:', document.body.textContent.match(/[$€£¥]\d+\.\d{2}/g) || []);
+        console.log('Amazon-style elements:', document.querySelectorAll('.a-price').length);
+        console.log('Check that all rounded prices show ".00" as fractional part');
+    </script>
+</body>
+</html>
