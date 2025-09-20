@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Rounder Debug Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 20px auto; 
+            padding: 20px; 
+            line-height: 1.6; 
+        }
+        .price { 
+            font-size: 1.5em; 
+            font-weight: bold; 
+            color: #d63384; 
+            margin: 10px 0;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+        .debug { 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Price Rounder Debug Test</h1>
+    
+    <div class="debug">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Install the Price Rounder extension</li>
+            <li>Open browser console (F12 → Console tab)</li>
+            <li>Look for "Price Rounder:" messages</li>
+            <li>Check if prices below change automatically</li>
+            <li>Use the extension popup to toggle and test</li>
+        </ol>
+    </div>
+
+    <h2>💰 Test Prices</h2>
+    
+    <div class="price">Basic test: $9.99</div>
+    <div class="price">European: €19.95</div>
+    <div class="price">British: £14.99</div>
+    <div class="price">With comma: $1,299.99</div>
+    <div class="price">Multiple of 5 test: $12.99</div>
+    <div class="price">Multiple of 10 test: $7.99</div>
+    
+    <h2>🧪 Manual Tests</h2>
+    <button onclick="addNewPrice()">Add Dynamic Price</button>
+    <button onclick="showConsoleInfo()">Show Console Info</button>
+    <button onclick="testExtension()">Test Extension</button>
+    
+    <div id="dynamicPrices"></div>
+    
+    <div class="debug">
+        <h3>Console Output:</h3>
+        <div id="consoleOutput" style="font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <script>
+        let priceCounter = 1;
+        
+        function addNewPrice() {
+            const container = document.getElementById('dynamicPrices');
+            const newPrice = document.createElement('div');
+            newPrice.className = 'price';
+            newPrice.textContent = `Dynamic price #${priceCounter}: $${(Math.random() * 100 + 10).toFixed(2)}`;
+            container.appendChild(newPrice);
+            priceCounter++;
+            log(`Added dynamic price: ${newPrice.textContent}`);
+        }
+        
+        function showConsoleInfo() {
+            log('=== Extension Debug Info ===');
+            log('Page URL: ' + window.location.href);
+            log('Document ready state: ' + document.readyState);
+            log('Extension should be processing prices now...');
+            
+            // Check if extension is working
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                log('Chrome extension API available');
+            } else {
+                log('ERROR: Chrome extension API not available');
+            }
+        }
+        
+        function testExtension() {
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                chrome.runtime.sendMessage({action: 'ping'}, function(response) {
+                    if (chrome.runtime.lastError) {
+                        log('ERROR: ' + chrome.runtime.lastError.message);
+                    } else {
+                        log('Extension communication working');
+                    }
+                });
+            } else {
+                log('Cannot test extension - API not available');
+            }
+        }
+        
+        function log(message) {
+            console.log(message);
+            const output = document.getElementById('consoleOutput');
+            const div = document.createElement('div');
+            div.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        // Log page load
+        window.addEventListener('load', function() {
+            log('Page fully loaded');
+            setTimeout(() => {
+                log('Checking for price changes after 2 seconds...');
+            }, 2000);
+        });
+        
+        // Initial log
+        log('Debug page initialized');
+    </script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Rounder Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .product {
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #d63384;
+        }
+        .original-price {
+            text-decoration: line-through;
+            color: #6c757d;
+            margin-right: 10px;
+        }
+        h1 { color: #495057; }
+        h2 { color: #6c757d; }
+        .note {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛒 Price Rounder Extension Test Page</h1>
+    
+    <div class="note">
+        <strong>Instructions:</strong> Install the Price Rounder extension and visit this page to see it in action! 
+        Prices are always rounded UP based on your selected mode:
+        <ul>
+            <li><strong>Round UP to whole number:</strong> $9.99 → $10.00, $9.01 → $10.00</li>
+            <li><strong>Round UP to multiple of 5:</strong> $9.99 → $10.00, $11.01 → $15.00</li>
+            <li><strong>Round UP to multiple of 10:</strong> $9.99 → $10.00, $11.01 → $20.00</li>
+        </ul>
+    </div>
+
+    <h2>🛍️ Products for Sale</h2>
+
+    <div class="product">
+        <h3>Wireless Headphones</h3>
+        <p>High-quality Bluetooth headphones with noise cancellation</p>
+        <div class="price">$99.99</div>
+    </div>
+
+    <div class="product">
+        <h3>Smart Watch</h3>
+        <p>Fitness tracker with heart rate monitor</p>
+        <div class="price">€249.95</div>
+    </div>
+
+    <div class="product">
+        <h3>Gaming Mouse</h3>
+        <p>Precision gaming mouse with RGB lighting</p>
+        <div class="price">£79.99</div>
+    </div>
+
+    <div class="product">
+        <h3>Laptop Stand</h3>
+        <p>Adjustable aluminum laptop stand</p>
+        <div class="price">$39.95</div>
+    </div>
+
+    <div class="product">
+        <h3>Phone Case</h3>
+        <p>Protective case with wireless charging support</p>
+        <div class="price">¥2,999</div>
+    </div>
+
+    <div class="product">
+        <h3>Desk Lamp</h3>
+        <p>LED desk lamp with adjustable brightness</p>
+        <div class="price">kr 299.95</div>
+    </div>
+
+    <div class="product">
+        <h3>Test Low Price</h3>
+        <p>Testing upward rounding behavior</p>
+        <div class="price">$3.01</div>
+    </div>
+
+    <div class="product">
+        <h3>Test Mid Price</h3>
+        <p>Testing multiple of 5 rounding</p>
+        <div class="price">€11.50</div>
+    </div>
+
+    <div class="product">
+        <h3>Test Higher Price</h3>
+        <p>Testing multiple of 10 rounding</p>
+        <div class="price">£23.25</div>
+    </div>
+
+    <div class="product">
+        <h3>Monitor</h3>
+        <p>24-inch Full HD monitor</p>
+        <div class="price">$199.99 <span class="original-price">$249.99</span></div>
+    </div>
+
+    <div class="product">
+        <h3>Webcam</h3>
+        <p>1080p HD webcam for video calls</p>
+        <div class="price">€59.95</div>
+    </div>
+
+    <h2>🧪 More Test Cases</h2>
+    
+    <p>Regular prices in text: The laptop costs $1,299.99 and comes with a free mouse worth €29.95.</p>
+    
+    <p>Various formats:</p>
+    <ul>
+        <li>Standard: $19.99</li>
+        <li>European: €24.95</li>
+        <li>British: £14.99</li>
+        <li>Japanese: ¥1,999</li>
+        <li>Korean: ₩19,999</li>
+        <li>Indian: ₹999.95</li>
+        <li>Swedish: 149.95 kr</li>
+        <li>Polish: 89.99 zł</li>
+        <li>With currency code: USD 49.99</li>
+        <li>After currency code: 29.95 EUR</li>
+    </ul>
+
+    <h2>📊 Expected Results by Rounding Mode (Always UP)</h2>
+    
+    <div class="note">
+        <strong>Round UP to Whole Number:</strong>
+        <ul>
+            <li>$99.99 → $100.00</li>
+            <li>$3.01 → $4.00</li>
+            <li>€11.50 → €12.00</li>
+            <li>£23.25 → £24.00</li>
+        </ul>
+        
+        <strong>Round UP to Multiple of 5:</strong>
+        <ul>
+            <li>$99.99 → $100.00</li>
+            <li>$3.01 → $5.00</li>
+            <li>€11.50 → €15.00</li>
+            <li>£23.25 → £25.00</li>
+        </ul>
+        
+        <strong>Round UP to Multiple of 10:</strong>
+        <ul>
+            <li>$99.99 → $100.00</li>
+            <li>$3.01 → $10.00</li>
+            <li>€11.50 → €20.00</li>
+            <li>£23.25 → £30.00</li>
+        </ul>
+    </div>
+
+    <script>
+        // Add some dynamic content to test real-time detection
+        setTimeout(function() {
+            const newProduct = document.createElement('div');
+            newProduct.className = 'product';
+            newProduct.innerHTML = `
+                <h3>🆕 Dynamically Added Product</h3>
+                <p>This product was added 3 seconds after page load</p>
+                <div class="price">$49.99</div>
+            `;
+            document.body.appendChild(newProduct);
+        }, 3000);
+    </script>
+</body>
+</html>
