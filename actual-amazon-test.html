@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actual Amazon Price Format Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f3f3f3; }
+        .amazon-item { 
+            background: white; 
+            padding: 20px; 
+            margin: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px;
+            display: inline-block;
+            width: 300px;
+            vertical-align: top;
+        }
+        .amazon-price {
+            font-size: 24px;
+            color: #B12704;
+            font-weight: normal;
+            margin: 10px 0;
+        }
+        .a-price {
+            display: inline-block;
+        }
+        .a-price-symbol {
+            font-size: 18px;
+            vertical-align: super;
+        }
+        .a-price-whole {
+            font-size: 28px;
+            font-weight: normal;
+        }
+        .a-price-fraction {
+            font-size: 16px;
+            vertical-align: super;
+        }
+        .a-offscreen {
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        .list-price {
+            color: #565959;
+            text-decoration: line-through;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+        .rating { color: #FFA41C; font-size: 14px; }
+        .review-count { color: #007185; font-size: 14px; }
+        .buy-button { 
+            background: #FFD814; 
+            border: 1px solid #FCD200;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #0F1111;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Actual Amazon Price Format Test</h1>
+    <p>Testing the exact price formats shown in the Amazon screenshot</p>
+
+    <!-- Exact format from screenshot -->
+    <div class="amazon-item">
+        <h4>Alconox Detergent Cleaning Concentrate 4 lb. Container</h4>
+        <div class="rating">★★★★☆ <span class="review-count">(486)</span></div>
+        
+        <!-- Amazon structured price -->
+        <div class="a-price">
+            <span class="a-offscreen">$40.72</span>
+            <span class="a-price-symbol">$</span>
+            <span class="a-price-whole">40</span>
+            <span class="a-price-fraction">72</span>
+        </div>
+        <span class="list-price">List: $48.37</span>
+        
+        <div><button class="buy-button">Buy Now</button></div>
+    </div>
+
+    <div class="amazon-item">
+        <h4>Cordless Electric Spin Scrubber,Cleaning Brush Scrub...</h4>
+        <div class="rating">★★★★☆ <span class="review-count">(11.3k)</span></div>
+        
+        <!-- Amazon structured price -->
+        <div class="a-price">
+            <span class="a-offscreen">$39.99</span>
+            <span class="a-price-symbol">$</span>
+            <span class="a-price-whole">39</span>
+            <span class="a-price-fraction">99</span>
+        </div>
+        <span class="list-price">List: $56.99</span>
+        
+        <div><button class="buy-button">Buy Now</button></div>
+    </div>
+
+    <!-- More Amazon-style examples -->
+    <div class="amazon-item">
+        <h4>Another Product Example</h4>
+        <div class="rating">★★★★★ <span class="review-count">(2.1k)</span></div>
+        
+        <div class="a-price">
+            <span class="a-offscreen">$24.99</span>
+            <span class="a-price-symbol">$</span>
+            <span class="a-price-whole">24</span>
+            <span class="a-price-fraction">99</span>
+        </div>
+        <span class="list-price">List: $34.99</span>
+        
+        <div><button class="buy-button">Buy Now</button></div>
+    </div>
+
+    <div class="amazon-item">
+        <h4>Electronics Item</h4>
+        <div class="rating">★★★★☆ <span class="review-count">(892)</span></div>
+        
+        <div class="a-price">
+            <span class="a-offscreen">$129.95</span>
+            <span class="a-price-symbol">$</span>
+            <span class="a-price-whole">129</span>
+            <span class="a-price-fraction">95</span>
+        </div>
+        <span class="list-price">List: $179.99</span>
+        
+        <div><button class="buy-button">Buy Now</button></div>
+    </div>
+
+    <!-- Test various price formats -->
+    <div class="amazon-item">
+        <h4>Various Amazon Price Formats</h4>
+        <div>
+            <div class="amazon-price">$15.99</div>
+            <div class="amazon-price">$99.95</div>
+            <div class="amazon-price">Price: $45.50</div>
+            <div class="amazon-price">Sale: $29.99</div>
+            <div class="list-price">Was: $39.99</div>
+        </div>
+    </div>
+
+    <!-- Test dynamic content -->
+    <div id="dynamic-container"></div>
+
+    <script>
+        // Add dynamic Amazon-style prices
+        function addDynamicPrice() {
+            const container = document.getElementById('dynamic-container');
+            const item = document.createElement('div');
+            item.className = 'amazon-item';
+            
+            const randomWhole = Math.floor(Math.random() * 200) + 10;
+            const randomCents = Math.floor(Math.random() * 100);
+            const centsStr = randomCents.toString().padStart(2, '0');
+            const fullPrice = `${randomWhole}.${centsStr}`;
+            
+            item.innerHTML = `
+                <h4>Dynamic Amazon Item</h4>
+                <div class="rating">★★★★☆ <span class="review-count">(${Math.floor(Math.random() * 5000)})</span></div>
+                <div class="a-price">
+                    <span class="a-offscreen">$${fullPrice}</span>
+                    <span class="a-price-symbol">$</span>
+                    <span class="a-price-whole">${randomWhole}</span>
+                    <span class="a-price-fraction">${centsStr}</span>
+                </div>
+                <span class="list-price">List: $${(parseFloat(fullPrice) + Math.random() * 20 + 10).toFixed(2)}</span>
+                <div><button class="buy-button">Buy Now</button></div>
+            `;
+            
+            container.appendChild(item);
+        }
+
+        // Add a few dynamic items
+        for (let i = 0; i < 2; i++) {
+            setTimeout(() => addDynamicPrice(), i * 1000);
+        }
+
+        // Test button
+        const button = document.createElement('button');
+        button.textContent = 'Add More Amazon Items';
+        button.onclick = addDynamicPrice;
+        button.style.margin = '20px';
+        button.style.padding = '10px';
+        button.style.background = '#FFD814';
+        button.style.border = '1px solid #FCD200';
+        button.style.borderRadius = '8px';
+        button.style.fontWeight = 'bold';
+        document.body.appendChild(button);
+    </script>
+</body>
+</html>

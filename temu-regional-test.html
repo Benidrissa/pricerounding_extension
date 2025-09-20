@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temu Regional Format Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .price { color: #d73502; font-weight: bold; margin: 10px 0; }
+        .temu-price { background: #d1ecf1; padding: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Temu Regional Format Test</h1>
+    <p>Testing Naira and other regional formats used by Temu</p>
+
+    <!-- Nigerian Naira formats -->
+    <div class="test-section temu-price">
+        <h3>Nigerian Naira (NGN) Formats</h3>
+        <div class="price">₦1,299.99</div>
+        <div class="price">₦2,499.00</div>
+        <div class="price">₦999.50</div>
+        <div class="price">NGN 1,299.99</div>
+        <div class="price">1,299.99 NGN</div>
+        <div class="price">1,299.99₦</div>
+        <div class="price">₦ 1,299.99</div>
+        <div class="price">Price: ₦1,299.99</div>
+        <div class="price">Cost: 1,299.99 naira</div>
+    </div>
+
+    <!-- European format with comma as decimal -->
+    <div class="test-section temu-price">
+        <h3>European Formats (Comma as Decimal)</h3>
+        <div class="price">€1.299,99</div>
+        <div class="price">€19,95</div>
+        <div class="price">1.299,99€</div>
+        <div class="price">19,95 €</div>
+        <div class="price">Price: €1.299,99</div>
+        <div class="price">Cost: 19,95€</div>
+    </div>
+
+    <!-- Mixed thousand and decimal separators -->
+    <div class="test-section temu-price">
+        <h3>Mixed Formats</h3>
+        <div class="price">$1,299.99</div>
+        <div class="price">£2,499.50</div>
+        <div class="price">¥999,999</div>
+        <div class="price">₹1,299.00</div>
+        <div class="price">R$1.299,99</div>
+        <div class="price">C$1,299.99</div>
+    </div>
+
+    <!-- Temu-style elements -->
+    <div class="test-section temu-price">
+        <h3>Temu-style Elements</h3>
+        <div data-type="price">₦1,299.99</div>
+        <div class="_2myxWHLi">₦999.50</div>
+        <span class="price">From ₦1,299.99</span>
+        <div class="cost">Cost: ₦2,499.00</div>
+        <div class="pricing">Sale: ₦999.99</div>
+        <span class="_2XgTiMJi">₦1,299.99</span>
+        <div class="amount">Total: ₦2,499.50</div>
+    </div>
+
+    <!-- Context-based prices -->
+    <div class="test-section temu-price">
+        <h3>Context-based Regional Prices</h3>
+        <div>Price: ₦1,299.99</div>
+        <div>Sale: €1.299,99</div>
+        <div>Deal: $1,299.99</div>
+        <div>Offer: £1,299.99</div>
+        <div>Total: ₦2,499.00</div>
+        <div>Amount: €1.999,50</div>
+        <div>Cost: $999.99</div>
+        <div>Buy: ₦1,499.99</div>
+    </div>
+
+    <script>
+        // Add some dynamic content to test observer
+        setTimeout(() => {
+            const newDiv = document.createElement('div');
+            newDiv.innerHTML = '<div class="price">Dynamic Naira: ₦1,599.99</div>';
+            document.body.appendChild(newDiv);
+        }, 2000);
+
+        // Add test button
+        const button = document.createElement('button');
+        button.textContent = 'Add Random Naira Price';
+        button.onclick = () => {
+            const newPrice = document.createElement('div');
+            newPrice.className = 'price';
+            const randomPrice = (Math.random() * 5000 + 1000).toFixed(2);
+            newPrice.textContent = `₦${randomPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+            document.body.appendChild(newPrice);
+        };
+        document.body.appendChild(button);
+    </script>
+</body>
+</html>

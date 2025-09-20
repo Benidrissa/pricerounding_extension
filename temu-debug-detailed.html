@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temu Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #fff; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .test-section h3 { margin-top: 0; color: #333; }
+        .price-element { margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 4px; }
+        ._2myxWHLi { color: #ff6b35; font-weight: bold; font-size: 18px; }
+        ._2XgTiMJi { color: #ff4757; font-weight: bold; font-size: 16px; }
+        ._23iHZvtC { color: #ff6b35; }
+        ._2de9ERAH { color: #ff4757; }
+        [data-type="price"] { display: inline-block; padding: 5px; }
+        .price { color: #e74c3c; font-weight: bold; }
+        .cost { color: #27ae60; font-weight: bold; }
+        .pricing { color: #8e44ad; font-weight: bold; }
+        .debug-info { background: #e8f4f8; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Temu Price Detection Debug Test</h1>
+    <div class="debug-info">
+        <strong>Debug Info:</strong> Open browser console to see Price Rounder logs.
+    </div>
+
+    <!-- Original Temu structure selectors -->
+    <div class="test-section">
+        <h3>Temu Original Structure</h3>
+        <div data-type="price" class="price-element">
+            <span class="_2XgTiMJi">$15.99</span>
+            <span class="_23iHZvtC">$</span>
+            <span class="_2de9ERAH">15.99</span>
+        </div>
+        <div class="_2myxWHLi price-element">€8.95</div>
+        <span class="_2XgTiMJi">$24.99</span>
+    </div>
+
+    <!-- Generic price classes -->
+    <div class="test-section">
+        <h3>Generic Price Classes</h3>
+        <div class="price price-element">$12.99</div>
+        <div class="cost price-element">€19.95</div>
+        <div class="pricing price-element">£7.50</div>
+        <span class="price">$39.99</span>
+        <span class="cost">€45.00</span>
+    </div>
+
+    <!-- Data attributes -->
+    <div class="test-section">
+        <h3>Data Attributes</h3>
+        <div data-price="$29.99" class="price-element">Special: $29.99</div>
+        <span data-price="€18.50">€18.50</span>
+        <div data-cost="$75.00" class="price-element">Cost: $75.00</div>
+    </div>
+
+    <!-- Generic class patterns -->
+    <div class="test-section">
+        <h3>Generic Class Patterns</h3>
+        <span class="_abc123">$14.99</span>
+        <div class="_price_123">€22.50</div>
+        <span class="_cost_abc">$8.99</span>
+        <div class="_amount_xyz">£15.75</div>
+        <span class="price_display">$99.99</span>
+        <div class="cost_info">€35.00</div>
+    </div>
+
+    <!-- Nested structures -->
+    <div class="test-section">
+        <h3>Nested Structures</h3>
+        <div class="price-element">
+            <div class="price-container">
+                <span class="price">$49.99</span>
+                <span class="currency">USD</span>
+            </div>
+        </div>
+        <div data-type="price">
+            <div class="inner-price">
+                <span>$89.95</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text only prices -->
+    <div class="test-section">
+        <h3>Text Only Prices</h3>
+        <div class="price-element">Price: $16.99</div>
+        <div class="price-element">Cost €12.50</div>
+        <div class="price-element">From $9.99</div>
+        <div class="price-element">Only £4.95!</div>
+        <span>Special offer: $19.99</span>
+        <p>Buy now for just $34.95</p>
+    </div>
+
+    <!-- Common Temu-like patterns -->
+    <div class="test-section">
+        <h3>Temu-like Patterns</h3>
+        <div class="_a1b2c3">$11.99</div>
+        <span class="_1price2">€25.00</span>
+        <div class="_cost_123_abc">$7.50</div>
+        <span class="_2cost3price4">£12.99</span>
+        <div class="product-price">$55.00</div>
+        <span class="item-cost">€41.25</span>
+    </div>
+
+    <!-- Dynamic content to test observer -->
+    <div class="test-section">
+        <h3>Dynamic Content</h3>
+        <button onclick="addDynamicPrices()">Add Dynamic Prices</button>
+        <div id="dynamic-container"></div>
+    </div>
+
+    <script>
+        // Add console logging to track what's happening
+        console.log('Temu Debug Test Page Loaded');
+        
+        function addDynamicPrices() {
+            const container = document.getElementById('dynamic-container');
+            const dynamicPrices = [
+                '<div class="_2myxWHLi">$' + (Math.random() * 50 + 10).toFixed(2) + '</div>',
+                '<span class="price">€' + (Math.random() * 30 + 5).toFixed(2) + '</span>',
+                '<div data-type="price"><span class="_2XgTiMJi">$' + (Math.random() * 100 + 20).toFixed(2) + '</span></div>',
+                '<div class="pricing">£' + (Math.random() * 40 + 8).toFixed(2) + '</div>'
+            ];
+            
+            dynamicPrices.forEach((priceHtml, index) => {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.innerHTML = priceHtml;
+                    div.className = 'price-element';
+                    container.appendChild(div);
+                    console.log('Added dynamic price:', priceHtml);
+                }, index * 500);
+            });
+        }
+
+        // Monitor DOM changes
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) {
+                            console.log('DOM element added:', node.outerHTML);
+                        }
+                    });
+                }
+            });
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Log all potential price elements found on page
+        setTimeout(() => {
+            console.log('=== TEMU DEBUG ANALYSIS ===');
+            
+            const temuSelectors = [
+                '[data-type="price"]', '._2myxWHLi', '._2XgTiMJi',
+                '[class*="price"]', '[class*="cost"]', '[class*="amount"]',
+                'span[class*="_"]', 'div[class*="_"]',
+                '[data-price]', '.price', '.cost', '.pricing',
+                'span[class*="2"]', 'div[class*="2"]'
+            ];
+            
+            temuSelectors.forEach(selector => {
+                try {
+                    const elements = document.querySelectorAll(selector);
+                    if (elements.length > 0) {
+                        console.log(`Selector "${selector}" found ${elements.length} elements:`);
+                        elements.forEach((el, i) => {
+                            console.log(`  ${i+1}. "${el.textContent.trim()}" (${el.tagName}${el.className ? '.' + el.className : ''})`);
+                        });
+                    }
+                } catch (e) {
+                    console.warn(`Selector "${selector}" failed:`, e.message);
+                }
+            });
+            
+            console.log('=== END TEMU DEBUG ANALYSIS ===');
+        }, 1000);
+    </script>
+</body>
+</html>

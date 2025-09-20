@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Amazon HTML Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f3f3f3; }
+        .amazon-item { 
+            background: white; 
+            padding: 20px; 
+            margin: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px;
+            display: inline-block;
+            width: 300px;
+            vertical-align: top;
+        }
+        .a-price {
+            font-size: 24px;
+            color: #B12704;
+            font-weight: normal;
+            margin: 10px 0;
+        }
+        .a-price-symbol {
+            font-size: 18px;
+            vertical-align: super;
+        }
+        .a-price-whole {
+            font-size: 28px;
+            font-weight: normal;
+        }
+        .a-price-fraction {
+            font-size: 16px;
+            vertical-align: super;
+        }
+        .a-offscreen {
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        .list-price {
+            color: #565959;
+            text-decoration: line-through;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+        .rating { color: #FFA41C; font-size: 14px; }
+        .review-count { color: #007185; font-size: 14px; }
+        .buy-button { 
+            background: #FFD814; 
+            border: 1px solid #FCD200;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #0F1111;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real Amazon HTML Test - Debugging</h1>
+    <p>Testing the EXACT HTML structure from your attachment</p>
+
+    <div id="dynamic-container">
+        <!-- EXACT HTML from your attachment -->
+        <div class="amazon-item">
+            <h4>Dynamic Amazon Item</h4>
+            <div class="rating">★★★★☆ <span class="review-count">(2727)</span></div>
+            <div class="a-price">
+                <span class="a-offscreen">$40.63</span>
+                <span class="a-price-symbol">$</span>
+                <span class="a-price-whole">40</span>
+                <span class="a-price-fraction">63</span>
+            </div>
+            <span class="list-price">List: $57.33</span>
+            <div><button class="buy-button">Buy Now</button></div>
+        </div>
+        
+        <div class="amazon-item">
+            <h4>Dynamic Amazon Item</h4>
+            <div class="rating">★★★★☆ <span class="review-count">(685)</span></div>
+            <div class="a-price">
+                <span class="a-offscreen">$34.63</span>
+                <span class="a-price-symbol">$</span>
+                <span class="a-price-whole">34</span>
+                <span class="a-price-fraction">63</span>
+            </div>
+            <span class="list-price">List: $58.75</span>
+            <div><button class="buy-button">Buy Now</button></div>
+        </div>
+    </div>
+
+    <div id="debug-info" style="margin-top: 20px; padding: 10px; background: #fff; border: 1px solid #ccc;">
+        <h3>Debug Information</h3>
+        <div id="debug-output"></div>
+    </div>
+
+    <script>
+        // Debug script to test the extension
+        function checkExtension() {
+            const debugOutput = document.getElementById('debug-output');
+            
+            // Check if extension is loaded
+            if (window.chrome && window.chrome.runtime) {
+                debugOutput.innerHTML += '<p>✅ Chrome extension API available</p>';
+            } else {
+                debugOutput.innerHTML += '<p>❌ Chrome extension API not available</p>';
+            }
+            
+            // Check for price elements
+            const priceElements = document.querySelectorAll('.a-price');
+            debugOutput.innerHTML += `<p>Found ${priceElements.length} .a-price elements</p>`;
+            
+            priceElements.forEach((element, index) => {
+                const offscreen = element.querySelector('.a-offscreen');
+                const whole = element.querySelector('.a-price-whole');
+                const fraction = element.querySelector('.a-price-fraction');
+                
+                debugOutput.innerHTML += `
+                    <div style="border: 1px solid #ddd; margin: 5px; padding: 5px;">
+                        <strong>Price ${index + 1}:</strong><br>
+                        Offscreen: ${offscreen ? offscreen.textContent : 'Not found'}<br>
+                        Whole: ${whole ? whole.textContent : 'Not found'}<br>
+                        Fraction: ${fraction ? fraction.textContent : 'Not found'}
+                    </div>
+                `;
+            });
+            
+            // Test console output
+            console.log('Price Rounder Debug: Page loaded, checking for extension activity...');
+            console.log('Price elements found:', priceElements.length);
+        }
+        
+        // Run checks when page loads
+        setTimeout(checkExtension, 1000);
+        
+        // Button to recheck
+        const button = document.createElement('button');
+        button.textContent = 'Recheck Extension';
+        button.onclick = checkExtension;
+        button.style.margin = '10px';
+        button.style.padding = '10px';
+        document.getElementById('debug-info').appendChild(button);
+        
+        // Monitor for changes
+        let originalPrices = {};
+        function monitorChanges() {
+            const priceElements = document.querySelectorAll('.a-price');
+            priceElements.forEach((element, index) => {
+                const whole = element.querySelector('.a-price-whole');
+                const fraction = element.querySelector('.a-price-fraction');
+                
+                if (whole && fraction) {
+                    const currentPrice = `${whole.textContent}.${fraction.textContent}`;
+                    if (!originalPrices[index]) {
+                        originalPrices[index] = currentPrice;
+                    } else if (originalPrices[index] !== currentPrice) {
+                        console.log(`Price Rounder: Price ${index + 1} changed from ${originalPrices[index]} to ${currentPrice}`);
+                        document.getElementById('debug-output').innerHTML += 
+                            `<p style="color: green;">✅ Price ${index + 1} changed: ${originalPrices[index]} → ${currentPrice}</p>`;
+                    }
+                }
+            });
+        }
+        
+        // Monitor every 2 seconds
+        setInterval(monitorChanges, 2000);
+    </script>
+</body>
+</html>

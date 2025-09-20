@@ -25,6 +25,11 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Settings saved:', newState);
         });
 
+        // Show processing indicator
+        if (newState) {
+            showProcessingIndicator('Processing prices...');
+        }
+
         // Send message to content script
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             if (tabs[0]) {
@@ -32,6 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     action: 'toggle',
                     enabled: newState
                 }, function(response) {
+                    hideProcessingIndicator();
+                    
                     if (chrome.runtime.lastError) {
                         // Content script might not be loaded yet
                         console.log('Content script not ready:', chrome.runtime.lastError.message);
@@ -39,6 +46,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else if (response && response.success) {
                         console.log('Toggle successful');
                         hideRefreshNotice();
+                        
+                        if (newState) {
+                            showSuccessMessage('Price rounding activated!');
+                        } else {
+                            showSuccessMessage('Original prices restored!');
+                        }
                     } else {
                         console.log('Toggle failed or no response');
                         showRefreshNotice();
@@ -53,8 +66,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (this.checked) {
                 const selectedMode = this.value;
                 
-                // Update examples
+                // Update examples immediately
                 updateExamples(selectedMode);
+                
+                // Show processing indicator
+                showProcessingIndicator('Updating prices...');
                 
                 // Save to storage
                 chrome.storage.sync.set({
@@ -63,19 +79,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('Rounding mode saved:', selectedMode);
                 });
 
-                // Send message to content script
+                // Send message to content script for immediate update
                 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                     if (tabs[0]) {
                         chrome.tabs.sendMessage(tabs[0].id, {
                             action: 'setRoundingMode',
                             mode: selectedMode
                         }, function(response) {
+                            hideProcessingIndicator();
+                            
                             if (chrome.runtime.lastError) {
                                 console.log('Content script not ready, will apply on next page load');
                                 showRefreshNotice();
                             } else if (response && response.success) {
                                 console.log('Rounding mode updated successfully');
                                 hideRefreshNotice();
+                                showSuccessMessage(`Prices updated to ${selectedMode} rounding mode!`);
+                            } else {
+                                showRefreshNotice();
                             }
                         });
                     }
@@ -147,27 +168,32 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateExamples(mode) {
         const examples = {
             nearest: {
-                '$9.99': '$10.00',
-                '€19.95': '€20.00',
-                '£14.99': '£15.00'
+                '$39.99': '$40.00',
+                '₦29,133': '₦30,000',
+                '€19.95': '€20.00'
             },
             multiple5: {
-                '$9.99': '$10.00',
-                '€19.95': '€20.00',
-                '£14.99': '£15.00'
+                '$39.99': '$40.00',
+                '₦29,133': '₦30,000',
+                '€19.95': '€20.00'
             },
             multiple10: {
-                '$9.99': '$10.00',
-                '€19.95': '€20.00',
-                '£14.99': '£20.00'
+                '$39.99': '$40.00',
+                '₦29,133': '₦30,000',
+                '€19.95': '€20.00'
             }
         };
 
         const currentExamples = examples[mode] || examples.nearest;
         
-        document.getElementById('example1After').textContent = currentExamples['$9.99'];
-        document.getElementById('example2After').textContent = currentExamples['€19.95'];
-        document.getElementById('example3After').textContent = currentExamples['£14.99'];
+        // Update example elements if they exist
+        const example1After = document.getElementById('example1After');
+        const example2After = document.getElementById('example2After');
+        const example3After = document.getElementById('example3After');
+        
+        if (example1After) example1After.textContent = currentExamples['$39.99'];
+        if (example2After) example2After.textContent = currentExamples['₦29,133'];
+        if (example3After) example3After.textContent = currentExamples['€19.95'];
     }
 
     function showRefreshNotice() {
@@ -176,5 +202,67 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function hideRefreshNotice() {
         refreshNotice.style.display = 'none';
+    }
+
+    function showProcessingIndicator(message) {
+        // Create or update processing indicator
+        let indicator = document.getElementById('processingIndicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'processingIndicator';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                background: #007bff;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 4px;
+                font-size: 12px;
+                text-align: center;
+                z-index: 1000;
+            `;
+            document.body.appendChild(indicator);
+        }
+        indicator.textContent = message;
+        indicator.style.display = 'block';
+    }
+
+    function hideProcessingIndicator() {
+        const indicator = document.getElementById('processingIndicator');
+        if (indicator) {
+            indicator.style.display = 'none';
+        }
+    }
+
+    function showSuccessMessage(message) {
+        // Create or update success message
+        let successMsg = document.getElementById('successMessage');
+        if (!successMsg) {
+            successMsg = document.createElement('div');
+            successMsg.id = 'successMessage';
+            successMsg.style.cssText = `
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                background: #28a745;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 4px;
+                font-size: 12px;
+                text-align: center;
+                z-index: 1000;
+            `;
+            document.body.appendChild(successMsg);
+        }
+        successMsg.textContent = message;
+        successMsg.style.display = 'block';
+        
+        // Auto-hide after 2 seconds
+        setTimeout(() => {
+            successMsg.style.display = 'none';
+        }, 2000);
     }
 });

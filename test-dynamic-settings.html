@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Settings Test - Price Rounder</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f0f2f5; 
+            line-height: 1.6;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 25px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .price-item { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border: 1px solid #e9ecef; 
+            border-radius: 8px;
+            text-align: center;
+        }
+        .price-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #dc3545;
+            margin: 10px 0;
+        }
+        .price-label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        .instructions {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+        .instructions ol {
+            margin-bottom: 0;
+        }
+        .monitor-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .change-log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-indicator.active { background: #28a745; }
+        .status-indicator.inactive { background: #dc3545; }
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .test-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .test-button.primary {
+            background: #007bff;
+            color: white;
+        }
+        .test-button.primary:hover {
+            background: #0056b3;
+        }
+        .test-button.secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .test-button.secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Dynamic Settings Test</h1>
+        <p>Test the extension's ability to update prices when settings change</p>
+
+        <div class="instructions">
+            <h3>📋 Testing Instructions:</h3>
+            <ol>
+                <li><strong>Install the extension</strong> and ensure it's active</li>
+                <li><strong>Open the extension popup</strong> (click extension icon)</li>
+                <li><strong>Change the rounding mode</strong> between "Nearest", "Multiple of 5", and "Multiple of 10"</li>
+                <li><strong>Watch this page</strong> - prices should update immediately without refresh</li>
+                <li><strong>Toggle enable/disable</strong> to see prices restore and re-apply</li>
+                <li><strong>Check the change log below</strong> for detailed monitoring</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h2>💰 Test Prices - Amazon Format</h2>
+            <div class="price-grid">
+                <div class="price-item">
+                    <div class="price-label">Product 1</div>
+                    <div class="a-price">
+                        <span class="a-offscreen">$39.99</span>
+                        <span class="a-price-symbol">$</span>
+                        <span class="a-price-whole">39</span>
+                        <span class="a-price-fraction">99</span>
+                    </div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Product 2</div>
+                    <div class="a-price">
+                        <span class="a-offscreen">$24.95</span>
+                        <span class="a-price-symbol">$</span>
+                        <span class="a-price-whole">24</span>
+                        <span class="a-price-fraction">95</span>
+                    </div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Product 3</div>
+                    <div class="a-price">
+                        <span class="a-offscreen">$12.49</span>
+                        <span class="a-price-symbol">$</span>
+                        <span class="a-price-whole">12</span>
+                        <span class="a-price-fraction">49</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🛒 Test Prices - Temu Format (Nigerian Naira)</h2>
+            <div class="price-grid">
+                <div class="price-item">
+                    <div class="price-label">Fashion Item</div>
+                    <div class="current-price">₦29,133</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Electronics</div>
+                    <div class="current-price">₦22,516</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Home Decor</div>
+                    <div class="current-price">₦3,218</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Beauty</div>
+                    <div class="current-price">₦8,499</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Sports</div>
+                    <div class="current-price">₦15,999</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Books</div>
+                    <div class="current-price">₦1,299</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🌍 Test Prices - Multi-Currency</h2>
+            <div class="price-grid">
+                <div class="price-item">
+                    <div class="price-label">USD Price</div>
+                    <div class="price-value">$49.99</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Euro Price</div>
+                    <div class="price-value">€35.95</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">British Pound</div>
+                    <div class="price-value">£18.99</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Mixed Text</div>
+                    <div>Price: $27.49<br>Sale: €19.99</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="monitor-section">
+            <h3>📊 Real-Time Monitoring</h3>
+            <div style="margin-bottom: 15px;">
+                <span class="status-indicator" id="extensionStatus"></span>
+                <span id="extensionStatusText">Checking extension...</span>
+            </div>
+            
+            <div class="test-controls">
+                <button class="test-button primary" onclick="checkStatus()">🔍 Check Extension Status</button>
+                <button class="test-button secondary" onclick="addDynamicPrice()">➕ Add Dynamic Price</button>
+                <button class="test-button secondary" onclick="clearLog()">🗑️ Clear Log</button>
+            </div>
+
+            <h4>Change Log:</h4>
+            <div class="change-log" id="changeLog">
+                <div style="color: #6c757d;">Monitoring for price changes... Change extension settings to see updates.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let originalPrices = new Map();
+        let changeCount = 0;
+        let monitoringInterval;
+
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('changeLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#007bff',
+                success: '#28a745',
+                warning: '#ffc107',
+                error: '#dc3545'
+            };
+            
+            const logEntry = document.createElement('div');
+            logEntry.style.color = colors[type] || colors.info;
+            logEntry.style.marginBottom = '4px';
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function checkStatus() {
+            const statusIndicator = document.getElementById('extensionStatus');
+            const statusText = document.getElementById('extensionStatusText');
+            
+            if (window.chrome && window.chrome.runtime) {
+                statusIndicator.className = 'status-indicator active';
+                statusText.textContent = 'Extension API available';
+                log('✅ Chrome extension API is available', 'success');
+            } else {
+                statusIndicator.className = 'status-indicator inactive';
+                statusText.textContent = 'Extension API not available';
+                log('❌ Chrome extension API not available', 'error');
+            }
+
+            // Count current prices
+            const priceElements = document.querySelectorAll('.a-price, .current-price, .price-value');
+            log(`📊 Found ${priceElements.length} price elements on page`, 'info');
+
+            console.log('🔍 Dynamic Settings Test: Status check completed');
+        }
+
+        function addDynamicPrice() {
+            const priceGrid = document.querySelector('.price-grid');
+            const newItem = document.createElement('div');
+            newItem.className = 'price-item';
+            
+            const randomPrice = Math.floor(Math.random() * 50000) + 1000;
+            const formattedPrice = randomPrice.toLocaleString('en-NG');
+            
+            newItem.innerHTML = `
+                <div class="price-label">Dynamic Item ${Date.now()}</div>
+                <div class="current-price">₦${formattedPrice}</div>
+            `;
+            
+            priceGrid.appendChild(newItem);
+            log(`➕ Added dynamic price: ₦${formattedPrice}`, 'info');
+        }
+
+        function clearLog() {
+            const logElement = document.getElementById('changeLog');
+            logElement.innerHTML = '<div style="color: #6c757d;">Log cleared. Monitoring for changes...</div>';
+        }
+
+        function monitorPriceChanges() {
+            const priceElements = document.querySelectorAll('.a-price-whole, .a-price-fraction, .current-price, .price-value');
+            
+            priceElements.forEach((element, index) => {
+                const currentText = element.textContent.trim();
+                const key = `element-${index}-${element.className}`;
+                
+                if (!originalPrices.has(key)) {
+                    originalPrices.set(key, currentText);
+                } else if (originalPrices.get(key) !== currentText) {
+                    changeCount++;
+                    const oldValue = originalPrices.get(key);
+                    log(`🔄 Price changed: "${oldValue}" → "${currentText}"`, 'success');
+                    console.log(`🔄 Dynamic Settings Test: Price change detected`, {
+                        element: element.className,
+                        from: oldValue,
+                        to: currentText
+                    });
+                    
+                    // Update stored value
+                    originalPrices.set(key, currentText);
+                }
+            });
+        }
+
+        function detectRoundingModeChange() {
+            // Monitor for specific rounding patterns
+            const wholeElements = document.querySelectorAll('.a-price-whole');
+            wholeElements.forEach(element => {
+                const value = parseInt(element.textContent);
+                if (!isNaN(value)) {
+                    if (value % 10 === 0 && value > 10) {
+                        log(`🎯 Detected "multiple of 10" rounding: ${value}`, 'warning');
+                    } else if (value % 5 === 0 && value > 5) {
+                        log(`🎯 Detected "multiple of 5" rounding: ${value}`, 'warning');
+                    }
+                }
+            });
+        }
+
+        // Initialize monitoring
+        function startMonitoring() {
+            log('🚀 Starting dynamic settings monitoring...', 'info');
+            checkStatus();
+            
+            // Monitor every 1 second for changes
+            monitoringInterval = setInterval(() => {
+                monitorPriceChanges();
+                detectRoundingModeChange();
+            }, 1000);
+        }
+
+        // Start monitoring when page loads
+        setTimeout(startMonitoring, 1000);
+
+        // Log key events
+        console.log('📄 Dynamic Settings Test page loaded');
+        console.log('🎯 Test different rounding modes in the extension popup');
+        console.log('🔄 Watch for real-time price updates without page refresh');
+        
+        // Listen for visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                log('👁️ Page became visible - rechecking prices', 'info');
+                setTimeout(checkStatus, 500);
+            }
+        });
+    </script>
+</body>
+</html>

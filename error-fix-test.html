@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Fix Test - Amazon Style</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .price { color: #d73502; font-weight: bold; margin: 10px 0; }
+        button { padding: 10px; margin: 10px; background: #007cba; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Error Fix Test - Dynamic Elements</h1>
+    <p>This page tests the error handling for dynamic content that gets removed during processing.</p>
+
+    <div class="test-section">
+        <h3>Amazon-style Prices</h3>
+        <div class="a-price" id="price1">
+            <span class="a-offscreen">$12.99</span>
+            <span class="a-price-symbol">$</span>
+            <span class="a-price-whole">12</span>
+            <span class="a-price-fraction">.99</span>
+        </div>
+        
+        <div class="price" id="price2">$19.99</div>
+        <div class="price" id="price3">€24.95</div>
+        <div class="price" id="price4">£18.50</div>
+    </div>
+
+    <div class="test-section">
+        <h3>Dynamic Testing</h3>
+        <button onclick="addDynamicPrice()">Add Dynamic Price</button>
+        <button onclick="removePrices()">Remove All Prices</button>
+        <button onclick="restorePrices()">Restore Prices</button>
+        <button onclick="toggleExtension()">Toggle Extension</button>
+        
+        <div id="dynamic-container"></div>
+    </div>
+
+    <script>
+        let dynamicCounter = 0;
+        
+        function addDynamicPrice() {
+            dynamicCounter++;
+            const container = document.getElementById('dynamic-container');
+            const newPrice = document.createElement('div');
+            newPrice.className = 'price';
+            newPrice.id = `dynamic-${dynamicCounter}`;
+            newPrice.textContent = `Dynamic price ${dynamicCounter}: $${(Math.random() * 100 + 10).toFixed(2)}`;
+            container.appendChild(newPrice);
+            
+            // Immediately remove some elements to test error handling
+            if (dynamicCounter % 3 === 0) {
+                setTimeout(() => {
+                    if (newPrice.parentNode) {
+                        newPrice.parentNode.removeChild(newPrice);
+                        console.log(`Removed dynamic price ${dynamicCounter}`);
+                    }
+                }, 100);
+            }
+        }
+        
+        function removePrices() {
+            const prices = document.querySelectorAll('.price, .a-price');
+            prices.forEach(price => {
+                if (price.parentNode) {
+                    price.parentNode.removeChild(price);
+                }
+            });
+            console.log('Removed all price elements');
+        }
+        
+        function restorePrices() {
+            location.reload();
+        }
+        
+        function toggleExtension() {
+            // Simulate extension toggle by dispatching events
+            console.log('Toggling extension...');
+            window.dispatchEvent(new CustomEvent('priceRounderToggle'));
+        }
+        
+        // Add prices continuously to stress test
+        setInterval(() => {
+            if (dynamicCounter < 50) {
+                addDynamicPrice();
+            }
+        }, 500);
+        
+        // Randomly remove elements to test error handling
+        setInterval(() => {
+            const allPrices = document.querySelectorAll('.price');
+            if (allPrices.length > 10) {
+                const randomPrice = allPrices[Math.floor(Math.random() * allPrices.length)];
+                if (randomPrice && randomPrice.parentNode && randomPrice.id.startsWith('dynamic-')) {
+                    randomPrice.parentNode.removeChild(randomPrice);
+                    console.log('Randomly removed a price element');
+                }
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

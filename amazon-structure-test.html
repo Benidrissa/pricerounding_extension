@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Price Structure Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .price-item {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            min-width: 150px;
+        }
+        
+        /* Amazon price styling */
+        .a-price {
+            color: #B12704;
+            font-weight: normal;
+        }
+        .a-price-symbol {
+            font-size: 21px;
+            vertical-align: top;
+        }
+        .a-price-whole {
+            font-size: 28px;
+            font-weight: normal;
+        }
+        .a-price-fraction {
+            font-size: 13px;
+            vertical-align: top;
+            margin-left: 1px;
+        }
+        .a-offscreen {
+            position: absolute;
+            left: -10000px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        
+        .debug-info {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .original-text {
+            font-family: monospace;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛒 Amazon Price Structure Test</h1>
+    
+    <div class="debug-info">
+        <h3>🎯 Test Goal</h3>
+        <p>Test the generic Amazon price processing that focuses on the <code>.a-offscreen</code> element as the source of truth.</p>
+        <p><strong>Expected behavior:</strong> The extension should process the offscreen text and update both the accessibility text and visual elements.</p>
+        <p><strong>Check:</strong> Open browser console (F12) to see processing logs.</p>
+    </div>
+
+    <!-- Exact Amazon Structure from User -->
+    <div class="test-section">
+        <h2>Exact Amazon Structure (User Provided)</h2>
+        <div class="price-item">
+            <h4>Original Structure</h4>
+            <span class="a-price" data-a-size="xl" data-a-color="base">
+                <span class="a-offscreen">$50.00</span>
+                <span aria-hidden="true">
+                    <span class="a-price-symbol">$</span>
+                    <span class="a-price-whole">49.</span>
+                    <span class="a-price-fraction">99</span>
+                </span>
+            </span>
+            <div class="original-text">
+                Original offscreen: "$50.00"<br>
+                Visual: "$49.99"<br>
+                Expected: "$50.00" (rounded up)
+            </div>
+        </div>
+        
+        <div class="price-item">
+            <h4>Another Example</h4>
+            <span class="a-price" data-a-size="xl" data-a-color="base">
+                <span class="a-offscreen">$25.00</span>
+                <span aria-hidden="true">
+                    <span class="a-price-symbol">$</span>
+                    <span class="a-price-whole">24.</span>
+                    <span class="a-price-fraction">95</span>
+                </span>
+            </span>
+            <div class="original-text">
+                Original offscreen: "$25.00"<br>
+                Visual: "$24.95"<br>
+                Expected: "$25.00" (already rounded)
+            </div>
+        </div>
+    </div>
+
+    <!-- More Amazon Price Variations -->
+    <div class="test-section">
+        <h2>Amazon Price Variations</h2>
+        
+        <div class="price-item">
+            <h4>Different Price 1</h4>
+            <span class="a-price" data-a-size="xl" data-a-color="base">
+                <span class="a-offscreen">$19.99</span>
+                <span aria-hidden="true">
+                    <span class="a-price-symbol">$</span>
+                    <span class="a-price-whole">19.</span>
+                    <span class="a-price-fraction">99</span>
+                </span>
+            </span>
+            <div class="original-text">Should become: $20.00</div>
+        </div>
+        
+        <div class="price-item">
+            <h4>Different Price 2</h4>
+            <span class="a-price" data-a-size="xl" data-a-color="base">
+                <span class="a-offscreen">$149.99</span>
+                <span aria-hidden="true">
+                    <span class="a-price-symbol">$</span>
+                    <span class="a-price-whole">149.</span>
+                    <span class="a-price-fraction">99</span>
+                </span>
+            </span>
+            <div class="original-text">Should become: $150.00</div>
+        </div>
+        
+        <div class="price-item">
+            <h4>Euro Price</h4>
+            <span class="a-price" data-a-size="xl" data-a-color="base">
+                <span class="a-offscreen">€29.95</span>
+                <span aria-hidden="true">
+                    <span class="a-price-symbol">€</span>
+                    <span class="a-price-whole">29.</span>
+                    <span class="a-price-fraction">95</span>
+                </span>
+            </span>
+            <div class="original-text">Should become: €30.00</div>
+        </div>
+        
+        <div class="price-item">
+            <h4>No Decimal in Whole</h4>
+            <span class="a-price" data-a-size="xl" data-a-color="base">
+                <span class="a-offscreen">$89.95</span>
+                <span aria-hidden="true">
+                    <span class="a-price-symbol">$</span>
+                    <span class="a-price-whole">89</span>
+                    <span class="a-price-fraction">95</span>
+                </span>
+            </span>
+            <div class="original-text">Should become: $90.00</div>
+        </div>
+    </div>
+
+    <!-- Edge Cases -->
+    <div class="test-section">
+        <h2>Edge Cases</h2>
+        
+        <div class="price-item">
+            <h4>No Offscreen Element</h4>
+            <span class="a-price" data-a-size="xl" data-a-color="base">
+                <span aria-hidden="true">
+                    <span class="a-price-symbol">$</span>
+                    <span class="a-price-whole">12.</span>
+                    <span class="a-price-fraction">99</span>
+                </span>
+            </span>
+            <div class="original-text">Fallback to visual elements</div>
+        </div>
+        
+        <div class="price-item">
+            <h4>Only Offscreen</h4>
+            <span class="a-price" data-a-size="xl" data-a-color="base">
+                <span class="a-offscreen">$39.99</span>
+            </span>
+            <div class="original-text">Should still process the offscreen text</div>
+        </div>
+    </div>
+
+    <!-- How It Should Work -->
+    <div class="test-section">
+        <h2>📋 How The New Generic Processing Works</h2>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 4px;">
+            <h4>1. Primary Approach: Offscreen-First</h4>
+            <ul>
+                <li>Look for <code>.a-offscreen</code> element (contains full price text like "$49.99")</li>
+                <li>Process this text using regular price processing patterns</li>
+                <li>Update the offscreen element with rounded text</li>
+                <li>Update visual elements (symbol, whole, fraction) to match</li>
+            </ul>
+            
+            <h4>2. Fallback: Visual Elements</h4>
+            <ul>
+                <li>If no offscreen element, use <code>.a-price-whole</code> and <code>.a-price-fraction</code></li>
+                <li>Combine them to get the original price</li>
+                <li>Round and update both visual and offscreen elements</li>
+            </ul>
+            
+            <h4>3. Format Preservation</h4>
+            <ul>
+                <li>Preserves original formatting (e.g., "49." vs "49")</li>
+                <li>Updates fraction to "00" for rounded prices</li>
+                <li>Maintains accessibility with proper offscreen text</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        console.log('=== Amazon Price Structure Test ===');
+        console.log('Amazon price containers found:', document.querySelectorAll('.a-price').length);
+        console.log('Offscreen elements found:', document.querySelectorAll('.a-offscreen').length);
+        console.log('Visual price elements found:', document.querySelectorAll('.a-price-whole').length);
+        
+        // List all offscreen prices
+        const offscreenPrices = Array.from(document.querySelectorAll('.a-offscreen')).map(el => el.textContent);
+        console.log('Offscreen prices:', offscreenPrices);
+        
+        // Monitor for changes
+        setTimeout(() => {
+            console.log('=== After Processing ===');
+            const newOffscreenPrices = Array.from(document.querySelectorAll('.a-offscreen')).map(el => el.textContent);
+            console.log('Updated offscreen prices:', newOffscreenPrices);
+        }, 3000);
+    </script>
+</body>
+</html>

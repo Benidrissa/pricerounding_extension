@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temu Price Detection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .price-item {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            min-width: 120px;
+        }
+        .debug-info {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛒 Temu Price Detection Debug Test</h1>
+    
+    <div class="debug-info">
+        <h3>🔍 Debug Instructions</h3>
+        <ol>
+            <li>Open browser console (F12 → Console)</li>
+            <li>Reload this page with the extension enabled</li>
+            <li>Look for debug logs starting with "Price Rounder:"</li>
+            <li>Check if any price patterns are being detected</li>
+            <li>Verify if Temu is detected as an e-commerce site</li>
+        </ol>
+    </div>
+
+    <!-- Various Price Formats That Might Be On Temu -->
+    <div class="test-section">
+        <h2>Common Price Formats</h2>
+        
+        <div class="price-item">
+            <h4>Format 1: Simple Dollar</h4>
+            <p>$12.99</p>
+            <p>$24.95</p>
+            <p>$149.99</p>
+        </div>
+        
+        <div class="price-item">
+            <h4>Format 2: No Decimals</h4>
+            <p>$12</p>
+            <p>$25</p>
+            <p>$150</p>
+        </div>
+        
+        <div class="price-item">
+            <h4>Format 3: One Decimal</h4>
+            <p>$12.9</p>
+            <p>$24.5</p>
+            <p>$149.0</p>
+        </div>
+        
+        <div class="price-item">
+            <h4>Format 4: With Spaces</h4>
+            <p>$ 12.99</p>
+            <p>$ 24.95</p>
+            <p>$ 149.99</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Other Currency Formats</h2>
+        
+        <div class="price-item">
+            <h4>Euro</h4>
+            <p>€12.99</p>
+            <p>€24.95</p>
+            <p>12.99€</p>
+            <p>24.95€</p>
+        </div>
+        
+        <div class="price-item">
+            <h4>Pound</h4>
+            <p>£12.99</p>
+            <p>£24.95</p>
+            <p>12.99£</p>
+            <p>24.95£</p>
+        </div>
+        
+        <div class="price-item">
+            <h4>Currency Codes</h4>
+            <p>USD 12.99</p>
+            <p>12.99 USD</p>
+            <p>EUR 24.95</p>
+            <p>24.95 EUR</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Mixed Content</h2>
+        <p>This product costs $19.99 and shipping is $4.95. Total would be $24.94.</p>
+        <p>Special offer: Buy now for €29.95 (was €39.99)!</p>
+        <p>Price range: $15 - $25 depending on options.</p>
+        <p>Starting at £12.50, premium version £19.99.</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Temu-style Structured Prices</h2>
+        <!-- Simulate Temu's actual structure -->
+        <div data-type="price" class="price-item">
+            <span class="_23iHZvtC">$</span>
+            <span class="_2XgTiMJi">19.99</span>
+        </div>
+        
+        <div data-type="price" class="price-item">
+            <span class="_23iHZvtC">$</span>
+            <span class="_2XgTiMJi">24.95</span>
+        </div>
+        
+        <div class="_2myxWHLi price-item">
+            <span>Product Price: $149.99</span>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Price Context Examples</h2>
+        <div class="price-item">
+            <h4>Product Title</h4>
+            <p>Amazing Product - Only $12.99!</p>
+            <p>Limited time offer</p>
+        </div>
+        
+        <div class="price-item">
+            <h4>Sale Price</h4>
+            <p>Was: $29.99</p>
+            <p>Now: $19.99</p>
+            <p>Save: $10.00</p>
+        </div>
+        
+        <div class="price-item">
+            <h4>Shipping Info</h4>
+            <p>Free shipping on orders over $25</p>
+            <p>Express delivery: +$5.99</p>
+        </div>
+    </div>
+
+    <script>
+        // Add some debugging info
+        console.log('=== Temu Price Detection Test ===');
+        console.log('Current URL:', window.location.href);
+        console.log('Hostname:', window.location.hostname);
+        console.log('Should be detected as e-commerce?', window.location.hostname.includes('temu') || 
+                    document.querySelector('[data-type="price"]') !== null ||
+                    document.querySelector('._2myxWHLi') !== null);
+        
+        // Find all text that looks like prices
+        const allText = document.body.textContent;
+        const priceMatches = allText.match(/[\$€£¥]\s*\d+\.?\d*/g);
+        console.log('Price-like text found:', priceMatches);
+        
+        // Check for Temu-specific elements
+        console.log('Temu price containers found:', document.querySelectorAll('[data-type="price"]').length);
+        console.log('Temu price classes found:', document.querySelectorAll('._2myxWHLi').length);
+        
+        // List some sample text content
+        const textNodes = [];
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        let node;
+        while (node = walker.nextNode()) {
+            if (node.textContent.trim() && node.textContent.match(/[\d.$€£¥]/)) {
+                textNodes.push(node.textContent.trim());
+            }
+        }
+        console.log('Sample text content with numbers/currency:', textNodes.slice(0, 20));
+    </script>
+</body>
+</html>

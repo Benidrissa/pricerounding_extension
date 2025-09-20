@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Price Detection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .test-section h3 { margin-top: 0; color: #333; }
+        .price { font-weight: bold; color: #d73502; margin: 5px 0; }
+        .amazon-price { background: #fff3cd; padding: 5px; }
+        .temu-price { background: #d1ecf1; padding: 5px; }
+        .generic-price { background: #f8f9fa; padding: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Universal Price Detection Test</h1>
+    <p>This page tests the universal price detection capabilities of the Price Rounder extension.</p>
+
+    <!-- Amazon-style prices -->
+    <div class="test-section amazon-price">
+        <h3>Amazon-style Prices</h3>
+        <div class="a-price">
+            <span class="a-offscreen">$12.99</span>
+            <span class="a-price-symbol">$</span>
+            <span class="a-price-whole">12</span>
+            <span class="a-price-fraction">.99</span>
+        </div>
+        <div class="a-price">
+            <span class="a-offscreen">€24.95</span>
+            <span class="a-price-symbol">€</span>
+            <span class="a-price-whole">24</span>
+            <span class="a-price-fraction">.95</span>
+        </div>
+        <div class="price">Amazon style: $19.99</div>
+        <div class="pricing">Price: $149.89</div>
+        <span class="a-price-display">$99.95</span>
+    </div>
+
+    <!-- Temu-style prices -->
+    <div class="test-section temu-price">
+        <h3>Temu-style Prices</h3>
+        <div data-type="price">
+            <span class="_2XgTiMJi">$15.99</span>
+            <span class="_23iHZvtC">$</span>
+            <span class="_2de9ERAH">15.99</span>
+        </div>
+        <div class="_2myxWHLi">€8.95</div>
+        <span class="price">Temu price: $7.99</span>
+        <div class="cost">Cost: €12.50</div>
+        <div class="pricing">From $4.99</div>
+    </div>
+
+    <!-- Generic e-commerce prices -->
+    <div class="test-section generic-price">
+        <h3>Generic E-commerce Prices</h3>
+        <div class="price">$29.99</div>
+        <div class="cost">€45.95</div>
+        <div class="amount">£18.50</div>
+        <div class="pricing">¥2999</div>
+        <span class="display-price">$199.99</span>
+        <span class="price-current">€89.95</span>
+        <div data-price="$75.99">Special offer: $75.99</div>
+        <div class="money">$125.00</div>
+        <div class="currency">€67.50</div>
+    </div>
+
+    <!-- Various currency formats -->
+    <div class="test-section">
+        <h3>Various Currency Formats</h3>
+        <div class="price">Symbol before: $9.99</div>
+        <div class="price">Symbol after: 9.99€</div>
+        <div class="price">With space: kr 19.95</div>
+        <div class="price">Currency code: USD 49.99</div>
+        <div class="price">Currency after: 29.95 EUR</div>
+        <div class="price">Polish: 39.99 zł</div>
+        <div class="price">Swedish: 149 kr</div>
+        <div class="price">Japanese: ¥1999</div>
+        <div class="price">British: £24.50</div>
+        <div class="price">Indian: ₹899</div>
+    </div>
+
+    <!-- Context-based prices -->
+    <div class="test-section">
+        <h3>Context-based Prices</h3>
+        <div>Price: $59.99</div>
+        <div>Cost: €39.95</div>
+        <div>Sale: $19.99 (was $39.99)</div>
+        <div>Deal: Only $14.95!</div>
+        <div>Offer: From $8.99</div>
+        <div>Total: $299.00</div>
+        <div>Pay: $49.50</div>
+        <div>Buy now: $12.99</div>
+        <div>Checkout: $199.95</div>
+        <div>Order total: $89.99</div>
+    </div>
+
+    <!-- Challenging formats -->
+    <div class="test-section">
+        <h3>Challenging Formats</h3>
+        <div class="price">With commas: $1,299.99</div>
+        <div class="price">Large number: €2,499.95</div>
+        <div class="price">Different decimal: 99,50 €</div>
+        <div class="price">No decimal: $199</div>
+        <div class="price">Multiple: $9.99 - $19.99</div>
+        <div class="price">Range: €15.95 to €29.95</div>
+        <div class="price">Percentage off: $39.99 (50% off)</div>
+        <div class="price">Shipping: $12.99 + $2.99 shipping</div>
+    </div>
+
+    <!-- Edge cases -->
+    <div class="test-section">
+        <h3>Edge Cases</h3>
+        <div>Price in sentence: The item costs $24.99 and is on sale.</div>
+        <div>Multiple prices: Buy 2 for $19.99 or 3 for $29.99</div>
+        <div>Special chars: Price: $39.99*</div>
+        <div>Mixed content: Product ($15.99) with free shipping</div>
+        <div>Long text: This amazing product is available for just $49.99 today only!</div>
+        <div>Nested: <span>Price: <strong>$19.99</strong></span></div>
+    </div>
+
+    <!-- Common price endings -->
+    <div class="test-section">
+        <h3>Common Price Endings</h3>
+        <div class="price">Ending .99: $12.99</div>
+        <div class="price">Ending .95: €19.95</div>
+        <div class="price">Ending .89: $24.89</div>
+        <div class="price">Ending .00: £50.00</div>
+        <div class="price">Ending 9: $19</div>
+        <div class="price">Ending 5: €25</div>
+        <div class="price">Odd ending: $17.97</div>
+        <div class="price">Random: $23.47</div>
+    </div>
+
+    <script>
+        // Add some dynamic content to test observer
+        setTimeout(() => {
+            const newDiv = document.createElement('div');
+            newDiv.innerHTML = '<div class="price">Dynamic price: $79.99</div>';
+            document.body.appendChild(newDiv);
+        }, 2000);
+
+        // Add an event listener to test button
+        const button = document.createElement('button');
+        button.textContent = 'Add Dynamic Price';
+        button.onclick = () => {
+            const newPrice = document.createElement('div');
+            newPrice.className = 'price';
+            newPrice.textContent = `Random price: $${(Math.random() * 100 + 10).toFixed(2)}`;
+            document.body.appendChild(newPrice);
+        };
+        document.body.appendChild(button);
+    </script>
+</body>
+</html>

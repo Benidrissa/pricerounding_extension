@@ -61,10 +61,16 @@
     // Currency symbols and patterns
     const currencySymbols = ['$', '€', '£', '¥', '₹', '₽', '₩', 'R$', 'C$', 'A$', 'kr', 'zł', '₪', '₦'];
     
-    // E-commerce site price structure configurations
+    // Universal e-commerce site price structure configurations
     const ecommerceConfigs = {
         amazon: {
-            selectors: ['.a-price'],
+            selectors: [
+                '.a-price', '.a-offscreen', 
+                '[class*="price"]', '[class*="cost"]',
+                '.a-price-whole', '.a-price-fraction',
+                'span[class*="a-"]', '.price-display',
+                '[data-price]', '.pricing', '.amount'
+            ],
             handler: 'processAmazonPrice',
             structure: {
                 container: '.a-price',
@@ -76,49 +82,170 @@
             }
         },
         temu: {
-            selectors: ['[data-type="price"]', '._2myxWHLi'],
+            selectors: [
+                // Original Temu selectors
+                '[data-type="price"]', '._2myxWHLi', '._2XgTiMJi',
+                
+                // Current price display selectors (based on screenshot)
+                '.current-price', '.price-section', '.price-section *',
+                '[class*="price"]', '[class*="cost"]', '[class*="amount"]',
+                
+                // Generic text-containing elements that might have prices
+                'span', 'div', 'p', 'strong', 'b',
+                
+                // Data attributes and aria labels
+                '[data-price]', '[aria-label*="price"]', '[aria-label*="cost"]',
+                
+                // Common price container classes
+                '.price', '.cost', '.pricing', '.money', '.currency',
+                
+                // Temu-specific dynamic classes (they change frequently)
+                'span[class*="_"]', 'div[class*="_"]',
+                'span[class*="2"]', 'div[class*="2"]',
+                'span[class*="price" i]', 'div[class*="price" i]'
+            ],
             handler: 'processTemuPrice',
             structure: {
                 container: '[data-type="price"]',
-                priceText: '._2XgTiMJi', // Main price display
-                symbol: '._23iHZvtC', // Currency symbol
-                amount: '._2de9ERAH' // Price amount
+                priceText: '._2XgTiMJi',
+                symbol: '._23iHZvtC',
+                amount: '._2de9ERAH'
             }
         },
         ebay: {
-            selectors: ['.display-price', '.price', '.ebayui-ellipsis-2'],
+            selectors: [
+                '.display-price', '.price', '.ebayui-ellipsis-2',
+                '[class*="price"]', '[class*="cost"]', '[class*="amount"]',
+                '[data-price]', '.pricing', '.cost-display'
+            ],
             handler: 'processGenericPrice'
         },
         walmart: {
-            selectors: ['[data-automation-id*="price"]', '.price-current', '.price-display'],
+            selectors: [
+                '[data-automation-id*="price"]', '.price-current', '.price-display',
+                '[class*="price"]', '[class*="cost"]', '[class*="amount"]',
+                '[data-price]', '.pricing', '.cost'
+            ],
             handler: 'processGenericPrice'
         },
         generic: {
-            selectors: ['.price', '.cost', '.amount', '[class*="price"]', '[class*="cost"]', '[data-price]'],
+            selectors: [
+                '.price', '.cost', '.amount', '.pricing',
+                '[class*="price"]', '[class*="cost"]', '[class*="amount"]',
+                '[data-price]', '[data-cost]', '[data-amount]',
+                'span[class*="$"]', 'div[class*="$"]',
+                '[aria-label*="price"]', '[aria-label*="cost"]',
+                '.money', '.currency', '.dollar', '.euro'
+            ],
             handler: 'processGenericPrice'
         }
     };
     
-    // Price patterns to match various price formats
+    // Enhanced universal price patterns to handle different regional formats
     const pricePatterns = [
-        // $9.99, €19.95, £4.99
-        /(\$|€|£|¥|₹|₽|₩|R\$|C\$|A\$|₪|₦)\s*(\d{1,3}(?:,\d{3})*)\.\d{2}/g,
-        // 9.99$, 19.95€, 4.99£ (symbol after)
-        /(\d{1,3}(?:,\d{3})*)\.\d{2}\s*(\$|€|£|¥|₹|₽|₩|R\$|C\$|A\$|₪|₦)/g,
-        // kr 9.99, zł 19.95 (symbol before with space)
-        /(kr|zł)\s+(\d{1,3}(?:,\d{3})*)\.\d{2}/g,
-        // 9.99 kr, 19.95 zł (symbol after with space)
-        /(\d{1,3}(?:,\d{3})*)\.\d{2}\s+(kr|zł)/g,
-        // USD 9.99, EUR 19.95 (currency code before)
-        /(USD|EUR|GBP|JPY|CAD|AUD|CHF|CNY|SEK|NOK|MXN|INR|RUB|KRW|SGD|HKD|NZD|ZAR|BRL|PLN|CZK|HUF|ILS|TRY|THB|MYR|PHP|IDR|VND|AED|SAR|EGP|NGN|KES|GHS|UGX|TZS|ZMW|BWP|NAD|SZL|LSL|MWK|RWF|BIF|DJF|ETB|SOS|SCR|MUR|MVR|NPR|BTN|LKR|PKR|BDT|AFN|IRR|IQD|JOD|KWD|LBP|SYP|YER|OMR|QAR|BHD|AMD|AZN|GEL|KGS|KZT|MDL|TJS|TMT|UZS|BYN|UAH|RON|BGN|HRK|RSD|BAM|MKD|ALL|EUR|DKK|ISK|FOK|FJD|TOP|WST|VUV|SBD|PGK|NCR|XPF|NZD|AUD|TVD|KID|NRU|PLW)\s+(\d{1,3}(?:,\d{3})*)\.\d{2}/g,
-        // 9.99 USD, 19.95 EUR (currency code after)
-        /(\d{1,3}(?:,\d{3})*)\.\d{2}\s+(USD|EUR|GBP|JPY|CAD|AUD|CHF|CNY|SEK|NOK|MXN|INR|RUB|KRW|SGD|HKD|NZD|ZAR|BRL|PLN|CZK|HUF|ILS|TRY|THB|MYR|PHP|IDR|VND|AED|SAR|EGP|NGN|KES|GHS|UGX|TZS|ZMW|BWP|NAD|SZL|LSL|MWK|RWF|BIF|DJF|ETB|SOS|SCR|MUR|MVR|NPR|BTN|LKR|PKR|BDT|AFN|IRR|IQD|JOD|KWD|LBP|SYP|YER|OMR|QAR|BHD|AMD|AZN|GEL|KGS|KZT|MDL|TJS|TMT|UZS|BYN|UAH|RON|BGN|HRK|RSD|BAM|MKD|ALL|EUR|DKK|ISK|FOK|FJD|TOP|WST|VUV|SBD|PGK|NCR|XPF|NZD|AUD|TVD|KID|NRU|PLW)/g
+        // AMAZON SPECIFIC PATTERNS (based on actual screenshot) - HIGHEST PRIORITY
+        // Amazon structured pricing: $40.72, $39.99 (for offscreen accessibility)
+        /\$(\d{1,3})\.(\d{2})/g,
+        
+        // Amazon list price format: List: $48.37, List: $56.99
+        /(List:\s*)\$(\d{1,3}(?:,\d{3})*\.\d{2})/gi,
+        
+        // TEMU SPECIFIC PATTERNS (based on actual screenshot) - HIGH PRIORITY
+        // Nigerian Naira format exactly as shown: ₦29,133, ₦22,516, ₦3,218
+        /₦(\d{1,2},\d{3}|\d{1,4})/g,
+        
+        // Save amount format: Save ₦5145.00, Save ₦630.00
+        /(Save\s+)₦(\d{1,4}(?:,\d{3})*(?:\.\d{2})?)/gi,
+        
+        // Strikethrough original price format: ₦46645.00
+        /₦(\d{2,5}(?:\.\d{2})?)/g,
+        
+        // Nigerian Naira and similar: ₦1,299.99 or ₦1,299,99 (comma as thousand separator)
+        /([₦₹₨₪₵₡₽₩¥])\s*(\d{1,3}(?:,\d{3})*[.,]\d{2})/g,
+        
+        // European format with comma as decimal: €19,95 or 1.299,95
+        /([€$£¥₹₽₩R\$C\$A\$₪₦₡₨₱₵])\s*(\d{1,3}(?:\.\d{3})*,\d{2})/g,
+        
+        // Standard US/UK format: $9.99, €19.95, £4.99
+        /([€$£¥₹₽₩R\$C\$A\$₪₦₡₨₱₵])\s*(\d{1,3}(?:,\d{3})*\.\d{2})/g,
+        
+        // Symbol after with various formats: 1,299.99₦, 19,95€, 1.299,95€
+        /(\d{1,3}(?:[,.\s]\d{3})*[.,]\d{2})\s*([€$£¥₹₽₩R\$C\$A\$₪₦₡₨₱₵])/g,
+        
+        // Currency codes with regional formats: NGN 1,299.99, EUR 1.299,95
+        /(NGN|USD|EUR|GBP|JPY|CAD|AUD|INR|RUB|CNY|KRW|BRL|ZAR|MXN|SGD|HKD|THB|TRY|PLN|CZK|HUF|RON|BGN|HRK|SEK|NOK|DKK|CHF|ILS|AED|SAR|EGP|KES|GHS|UGX|TZS|ZMW|XAF|XOF)\s*(\d{1,3}(?:[,.\s]\d{3})*[.,]\d{0,2})/g,
+        
+        // Currency codes after: 1,299.99 NGN, 19,95 EUR
+        /(\d{1,3}(?:[,.\s]\d{3})*[.,]\d{0,2})\s*(NGN|USD|EUR|GBP|JPY|CAD|AUD|INR|RUB|CNY|KRW|BRL|ZAR|MXN|SGD|HKD|THB|TRY|PLN|CZK|HUF|RON|BGN|HRK|SEK|NOK|DKK|CHF|ILS|AED|SAR|EGP|KES|GHS|UGX|TZS|ZMW|XAF|XOF)/g,
+        
+        // Special currency names with regional formats
+        /(kr|zł|lei|din|kn|rsd|mkd|all|ron|bgn|hrk|bam|czk|huf|pln|sek|nok|dkk|isk|naira|kobo|peseta|peso|real|rand|yuan|won|rupiah|baht|ringgit|dong|riyal|dirham|shekel)\s*(\d{1,3}(?:[,.\s]\d{3})*[.,]\d{0,2})/gi,
+        
+        // Currency names after with formats
+        /(\d{1,3}(?:[,.\s]\d{3})*[.,]\d{0,2})\s*(kr|zł|lei|din|kn|rsd|mkd|all|ron|bgn|hrk|bam|czk|huf|pln|sek|nok|dkk|isk|naira|kobo|peseta|peso|real|rand|yuan|won|rupiah|baht|ringgit|dong|riyal|dirham|shekel)/gi,
+        
+        // Pure numbers with thousand separators: 1,299.99, 1.299,95, 9.99
+        /\b(\d{1,3}(?:,\d{3})+\.\d{2})\b/g,        // US format with commas: 1,299.99
+        /\b(\d{1,3}(?:\.\d{3})+,\d{2})\b/g,        // EU format with dots: 1.299,95
+        /\b(\d{1,4}[.,]\d{2})\b/g,                  // Simple decimal: 9.99 or 9,99
+        
+        // Numbers without decimals but clearly prices in various formats
+        /\b(\d{1,3}(?:[,.\s]\d{3})+)\b(?=\s*(?:only|just|from|starting|price|cost|sale|deal|offer|discount|off|save|reduced|was|now|today|\+|$))/gi,
+        
+        // Context-based price detection with flexible formatting
+        /(?:price|cost|sale|deal|offer|discount|save|was|now|only|just|from|starting|total|amount|pay|buy|purchase|checkout|cart|order)[\s:]*([€$£¥₹₽₩R\$C\$A\$₪₦₡₨₱₵]?\s*\d{1,4}(?:[,.\s]\d{3})*[.,]?\d{0,2}[€$£¥₹₽₩R\$C\$A\$₪₦₡₨₱₵]?)/gi,
+        
+        // Common price endings with various formats
+        /(\d+[.,][89]9|[.,]95|[.,]50|[.,]00)/g,
+        
+        // Naira specific patterns (Nigerian format)
+        /(₦|NGN|naira)\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/gi,
+        /(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)\s*(₦|NGN|naira)/gi
     ];
 
-    // Function to round a price value based on selected mode (always UP)
+    // Enhanced function to round price values with regional format support
     function roundPrice(priceStr) {
-        // Extract numeric value
-        const numericValue = parseFloat(priceStr.replace(/[^\d.]/g, ''));
+        // Handle different regional number formats
+        let cleanPrice = priceStr;
+        let numericValue;
+        
+        // Detect format and normalize
+        if (priceStr.includes(',') && priceStr.includes('.')) {
+            // Mixed format - determine which is decimal separator
+            const lastComma = priceStr.lastIndexOf(',');
+            const lastDot = priceStr.lastIndexOf('.');
+            
+            if (lastDot > lastComma) {
+                // US format: 1,299.99 (comma = thousand, dot = decimal)
+                cleanPrice = priceStr.replace(/[^\d.]/g, '');
+            } else {
+                // EU format: 1.299,99 (dot = thousand, comma = decimal)
+                cleanPrice = priceStr.replace(/\./g, '').replace(',', '.');
+                cleanPrice = cleanPrice.replace(/[^\d.]/g, '');
+            }
+        } else if (priceStr.includes(',') && !priceStr.includes('.')) {
+            // Only comma - could be thousand separator or decimal
+            const commaIndex = priceStr.lastIndexOf(',');
+            const afterComma = priceStr.substring(commaIndex + 1);
+            
+            if (afterComma.length === 2 && /^\d{2}$/.test(afterComma)) {
+                // Decimal separator: 19,99
+                cleanPrice = priceStr.replace(',', '.').replace(/[^\d.]/g, '');
+            } else {
+                // Thousand separator: 1,299
+                cleanPrice = priceStr.replace(/,/g, '').replace(/[^\d]/g, '');
+            }
+        } else {
+            // Simple format or dot only
+            cleanPrice = priceStr.replace(/[^\d.]/g, '');
+        }
+        
+        numericValue = parseFloat(cleanPrice);
+        
+        if (isNaN(numericValue)) {
+            console.log(`Price Rounder: Invalid price format: "${priceStr}" -> "${cleanPrice}"`);
+            return priceStr; // Return original if can't parse
+        }
         
         let rounded;
         switch (roundingMode) {
@@ -137,65 +264,151 @@
                 break;
         }
         
+        console.log(`Price Rounder: ${priceStr} (${numericValue}) → ${rounded.toFixed(2)}`);
         return rounded.toFixed(2);
     }
 
-    // Function to replace price in text while preserving format
+    // Enhanced function to replace price in text while preserving regional format
     function replacePriceInText(text, match, currencySymbol, price, isSymbolAfter = false, isSpaced = false) {
         const roundedPrice = roundPrice(price);
         
+        // Detect original format to preserve it
+        let formattedPrice = roundedPrice;
+        
+        // Special handling for Nigerian Naira (Temu format) - no decimals, comma thousands
+        if (currencySymbol === '₦' || currencySymbol === 'NGN' || currencySymbol.toLowerCase() === 'naira') {
+            const roundedNum = Math.round(parseFloat(roundedPrice));
+            // Format with comma thousands but no decimals (like Temu: ₦29,133)
+            formattedPrice = roundedNum.toLocaleString('en-NG', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+        // Preserve thousand separator format from original
+        else if (price.includes(',') && !price.includes('.')) {
+            // Original had comma only - if it was thousand separator, preserve it
+            const commaIndex = price.lastIndexOf(',');
+            const afterComma = price.substring(commaIndex + 1);
+            if (afterComma.length > 2) {
+                // Was thousand separator
+                const roundedNum = Math.round(parseFloat(roundedPrice));
+                formattedPrice = roundedNum.toLocaleString('en-US') + '.00';
+            } else {
+                // Was decimal separator - use original format
+                formattedPrice = Math.round(parseFloat(roundedPrice)) + ',00';
+            }
+        } else if (price.includes('.') && price.includes(',')) {
+            const lastComma = price.lastIndexOf(',');
+            const lastDot = price.lastIndexOf('.');
+            
+            if (lastDot > lastComma) {
+                // US format: 1,299.99
+                const roundedNum = Math.round(parseFloat(roundedPrice));
+                formattedPrice = roundedNum.toLocaleString('en-US') + '.00';
+            } else {
+                // EU format: 1.299,99
+                const roundedNum = Math.round(parseFloat(roundedPrice));
+                formattedPrice = roundedNum.toLocaleString('de-DE').replace(',', '.') + ',00';
+            }
+        } else if (price.includes('.')) {
+            // Simple decimal format
+            formattedPrice = Math.round(parseFloat(roundedPrice)) + '.00';
+        } else {
+            // No decimal - just round to whole number
+            formattedPrice = Math.round(parseFloat(roundedPrice)).toString();
+        }
+        
         if (isSymbolAfter) {
             return isSpaced ? 
-                `${roundedPrice} ${currencySymbol}` : 
-                `${roundedPrice}${currencySymbol}`;
+                `${formattedPrice} ${currencySymbol}` : 
+                `${formattedPrice}${currencySymbol}`;
         } else {
             return isSpaced ? 
-                `${currencySymbol} ${roundedPrice}` : 
-                `${currencySymbol}${roundedPrice}`;
+                `${currencySymbol} ${formattedPrice}` : 
+                `${currencySymbol}${formattedPrice}`;
         }
     }
 
-    // Function to process text content and round prices
+    // Enhanced function to process text content and round prices with regional support
     function processTextForPrices(text) {
         if (!text || typeof text !== 'string') return text;
         
         let processedText = text;
+        let changesMade = 0;
 
-        // Pattern 1: $9.99, €19.95, £4.99 (symbol before, no space)
-        processedText = processedText.replace(/(\$|€|£|¥|₹|₽|₩|R\$|C\$|A\$|₪|₦)\s*(\d{1,3}(?:,\d{3})*\.\d{2})/g, 
-            (match, symbol, price) => {
-                return replacePriceInText(match, match, symbol, price, false, false);
+        // Use the enhanced pricePatterns array for comprehensive matching
+        pricePatterns.forEach((pattern, index) => {
+            processedText = processedText.replace(pattern, (match, ...groups) => {
+                changesMade++;
+                console.log(`Price Rounder: Pattern ${index + 1} - Found "${match}"`);
+                
+                // Determine symbol and price from the groups
+                let symbol = '';
+                let price = '';
+                let isSymbolAfter = false;
+                let isSpaced = false;
+                
+                // Parse groups based on pattern structure
+                if (groups.length >= 2) {
+                    const group1 = groups[0];
+                    const group2 = groups[1];
+                    
+                    // Check if first group is currency symbol
+                    if (/[€$£¥₹₽₩₦₡₨₱₵₪]|NGN|USD|EUR|GBP|JPY|kr|zł|naira/i.test(group1)) {
+                        symbol = group1;
+                        price = group2;
+                        isSymbolAfter = false;
+                        isSpaced = match.includes(' ');
+                    } else {
+                        // First group is price, second is symbol
+                        price = group1;
+                        symbol = group2;
+                        isSymbolAfter = true;
+                        isSpaced = match.includes(' ');
+                    }
+                } else if (groups.length === 1) {
+                    // Single group - likely just a number, try to preserve context
+                    price = groups[0];
+                    symbol = ''; // No symbol detected
+                }
+                
+                if (price && /\d/.test(price)) {
+                    return replacePriceInText(match, match, symbol, price, isSymbolAfter, isSpaced);
+                }
+                
+                return match; // Return unchanged if parsing failed
             });
+        });
 
-        // Pattern 2: 9.99$, 19.95€ (symbol after, no space)
-        processedText = processedText.replace(/(\d{1,3}(?:,\d{3})*\.\d{2})\s*(\$|€|£|¥|₹|₽|₩|R\$|C\$|A\$|₪|₦)/g, 
-            (match, price, symbol) => {
-                return replacePriceInText(match, match, symbol, price, true, false);
-            });
-
-        // Pattern 3: kr 9.99, zł 19.95 (symbol before with space)
-        processedText = processedText.replace(/(kr|zł)\s+(\d{1,3}(?:,\d{3})*\.\d{2})/g, 
-            (match, symbol, price) => {
-                return replacePriceInText(match, match, symbol, price, false, true);
-            });
-
-        // Pattern 4: 9.99 kr, 19.95 zł (symbol after with space)
-        processedText = processedText.replace(/(\d{1,3}(?:,\d{3})*\.\d{2})\s+(kr|zł)/g, 
-            (match, price, symbol) => {
+        if (changesMade > 0) {
+            console.log(`Price Rounder: Made ${changesMade} price changes in text`);
+        }
+        
+        return processedText;
+    }
+                console.log(`Price Rounder: Text Pattern 4 - Found "${match}"`);
                 return replacePriceInText(match, match, symbol, price, true, true);
             });
 
         // Pattern 5: USD 9.99 (currency code before)
-        processedText = processedText.replace(/(USD|EUR|GBP|JPY|CAD|AUD|CHF|CNY|SEK|NOK|MXN|INR|RUB|KRW|SGD|HKD|NZD|ZAR|BRL|PLN|CZK|HUF|ILS|TRY|THB|MYR|PHP|IDR|VND|AED|SAR|EGP|NGN|KES|GHS|UGX|TZS|ZMW|BWP|NAD|SZL|LSL|MWK|RWF|BIF|DJF|ETB|SOS|SCR|MUR|MVR|NPR|BTN|LKR|PKR|BDT|AFN|IRR|IQD|JOD|KWD|LBP|SYP|YER|OMR|QAR|BHD|AMD|AZN|GEL|KGS|KZT|MDL|TJS|TMT|UZS|BYN|UAH|RON|BGN|HRK|RSD|BAM|MKD|ALL|DKK|ISK|FOK|FJD|TOP|WST|VUV|SBD|PGK|NCR|XPF|TVD|KID|NRU|PLW)\s+(\d{1,3}(?:,\d{3})*\.\d{2})/g, 
+        processedText = processedText.replace(/(USD|EUR|GBP|JPY|CAD|AUD|CHF|CNY|SEK|NOK|MXN|INR|RUB|KRW|SGD|HKD|NZD|ZAR|BRL|PLN|CZK|HUF|ILS|TRY|THB|MYR|PHP|IDR|VND|AED|SAR|EGP|NGN|KES|GHS|UGX|TZS|ZMW|BWP|NAD|SZL|LSL|MWK|RWF|BIF|DJF|ETB|SOS|SCR|MUR|MVR|NPR|BTN|LKR|PKR|BDT|AFN|IRR|IQD|JOD|KWD|LBP|SYP|YER|OMR|QAR|BHD|AMD|AZN|GEL|KGS|KZT|MDL|TJS|TMT|UZS|BYN|UAH|RON|BGN|HRK|RSD|BAM|MKD|ALL|DKK|ISK|FOK|FJD|TOP|WST|VUV|SBD|PGK|NCR|XPF|TVD|KID|NRU|PLW)\s+(\d{1,3}(?:,\d{3})*\.?\d{0,2})/g, 
             (match, symbol, price) => {
+                changesMade++;
+                console.log(`Price Rounder: Text Pattern 5 - Found "${match}"`);
                 return replacePriceInText(match, match, symbol, price, false, true);
             });
 
         // Pattern 6: 9.99 USD (currency code after)
-        processedText = processedText.replace(/(\d{1,3}(?:,\d{3})*\.\d{2})\s+(USD|EUR|GBP|JPY|CAD|AUD|CHF|CNY|SEK|NOK|MXN|INR|RUB|KRW|SGD|HKD|NZD|ZAR|BRL|PLN|CZK|HUF|ILS|TRY|THB|MYR|PHP|IDR|VND|AED|SAR|EGP|NGN|KES|GHS|UGX|TZS|ZMW|BWP|NAD|SZL|LSL|MWK|RWF|BIF|DJF|ETB|SOS|SCR|MUR|MVR|NPR|BTN|LKR|PKR|BDT|AFN|IRR|IQD|JOD|KWD|LBP|SYP|YER|OMR|QAR|BHD|AMD|AZN|GEL|KGS|KZT|MDL|TJS|TMT|UZS|BYN|UAH|RON|BGN|HRK|RSD|BAM|MKD|ALL|DKK|ISK|FOK|FJD|TOP|WST|VUV|SBD|PGK|NCR|XPF|TVD|KID|NRU|PLW)/g, 
+        processedText = processedText.replace(/(\d{1,3}(?:,\d{3})*\.?\d{0,2})\s+(USD|EUR|GBP|JPY|CAD|AUD|CHF|CNY|SEK|NOK|MXN|INR|RUB|KRW|SGD|HKD|NZD|ZAR|BRL|PLN|CZK|HUF|ILS|TRY|THB|MYR|PHP|IDR|VND|AED|SAR|EGP|NGN|KES|GHS|UGX|TZS|ZMW|BWP|NAD|SZL|LSL|MWK|RWF|BIF|DJF|ETB|SOS|SCR|MUR|MVR|NPR|BTN|LKR|PKR|BDT|AFN|IRR|IQD|JOD|KWD|LBP|SYP|YER|OMR|QAR|BHD|AMD|AZN|GEL|KGS|KZT|MDL|TJS|TMT|UZS|BYN|UAH|RON|BGN|HRK|RSD|BAM|MKD|ALL|DKK|ISK|FOK|FJD|TOP|WST|VUV|SBD|PGK|NCR|XPF|TVD|KID|NRU|PLW)/g, 
             (match, price, symbol) => {
+                changesMade++;
+                console.log(`Price Rounder: Text Pattern 6 - Found "${match}"`);
                 return replacePriceInText(match, match, symbol, price, true, true);
             });
+
+        if (changesMade > 0) {
+            console.log(`Price Rounder: Made ${changesMade} text price replacements`);
+        }
 
         return processedText;
     }
@@ -219,137 +432,387 @@
         // Process each configured e-commerce site
         Object.entries(ecommerceConfigs).forEach(([siteName, config]) => {
             config.selectors.forEach(selector => {
-                const elements = document.querySelectorAll(selector);
-                elements.forEach(element => {
-                    if (config.handler === 'processAmazonPrice' && processAmazonPrice(element)) {
-                        processedCount++;
-                    } else if (config.handler === 'processTemuPrice' && processTemuPrice(element)) {
-                        processedCount++;
-                    } else if (config.handler === 'processGenericPrice' && processGenericPrice(element)) {
-                        processedCount++;
-                    }
-                });
+                try {
+                    const elements = document.querySelectorAll(selector);
+                    elements.forEach(element => {
+                        // Check if element is still in DOM and valid
+                        if (!element || !element.parentNode) {
+                            return;
+                        }
+                        
+                        try {
+                            if (config.handler === 'processAmazonPrice' && processAmazonPrice(element)) {
+                                processedCount++;
+                            } else if (config.handler === 'processTemuPrice' && processTemuPrice(element)) {
+                                processedCount++;
+                            } else if (config.handler === 'processGenericPrice' && processGenericPrice(element)) {
+                                processedCount++;
+                            }
+                        } catch (elementError) {
+                            console.warn(`Price Rounder: Error processing element with ${config.handler}:`, elementError);
+                        }
+                    });
+                } catch (selectorError) {
+                    console.warn(`Price Rounder: Error with selector ${selector}:`, selectorError);
+                }
             });
         });
         
         console.log(`Price Rounder: Processed ${processedCount} structured price elements`);
     }
 
-    // Amazon price structure handler
+    // Amazon price structure handler - more generic approach
     function processAmazonPrice(priceElement) {
+        // Safety check
+        if (!priceElement || !priceElement.parentNode) {
+            return false;
+        }
+        
         const config = ecommerceConfigs.amazon.structure;
+        let processed = false;
+        
+        try {
+            // Strategy 1: Try offscreen element (accessibility text)
+            const offscreenElement = priceElement.querySelector(config.offscreen);
+            if (offscreenElement && offscreenElement.textContent && offscreenElement.textContent.trim()) {
+                const originalText = offscreenElement.textContent.trim();
+                const processedText = processTextForPrices(originalText);
+                
+                if (originalText !== processedText) {
+                    console.log(`Price Rounder: Amazon offscreen "${originalText}" → "${processedText}"`);
+                    
+                    if (!originalPrices.has(priceElement)) {
+                        originalPrices.set(priceElement, {
+                            type: 'amazon',
+                            offscreen: originalText,
+                            whole: null,
+                            fraction: null
+                        });
+                    }
+                    
+                    offscreenElement.textContent = processedText;
+                    updateAmazonVisualElements(priceElement, processedText, config);
+                    processed = true;
+                }
+            }
+            
+            // Strategy 2: Try structured elements (whole + fraction)
+            if (!processed) {
+                const wholeElement = priceElement.querySelector(config.whole);
+                const fractionElement = priceElement.querySelector(config.fraction);
+                
+                if (wholeElement && fractionElement && wholeElement.textContent && fractionElement.textContent) {
+                    const whole = wholeElement.textContent.replace(/[^\d]/g, '');
+                    const fraction = fractionElement.textContent.replace(/[^\d]/g, '');
+                    
+                    if (whole && fraction) {
+                        const originalPrice = parseFloat(`${whole}.${fraction}`);
+                        const roundedPrice = getRoundedPrice(originalPrice);
+                        const roundedWhole = Math.floor(roundedPrice);
+                        
+                        if (!originalPrices.has(priceElement)) {
+                            originalPrices.set(priceElement, {
+                                type: 'amazon',
+                                offscreen: offscreenElement ? offscreenElement.textContent : null,
+                                whole: wholeElement.textContent,
+                                fraction: fractionElement.textContent
+                            });
+                        }
+                        
+                        // Update visual elements with rounded values
+                        wholeElement.textContent = roundedWhole.toString();
+                        fractionElement.textContent = "00";  // Always show 00 for rounded prices
+                        
+                        // Update offscreen for accessibility
+                        if (offscreenElement) {
+                            const symbolElement = priceElement.querySelector(config.symbol);
+                            const symbol = symbolElement && symbolElement.textContent ? symbolElement.textContent.trim() : '$';
+                            offscreenElement.textContent = `${symbol}${roundedWhole.toFixed(2)}`;
+                        }
+                        
+                        console.log(`Price Rounder: Amazon structured $${originalPrice} → $${roundedWhole}.00`);
+                        processed = true;
+                    }
+                }
+            }
+            
+            // Strategy 3: Universal text processing on any text content
+            if (!processed) {
+                const allTextElements = priceElement.querySelectorAll('*');
+                for (const element of allTextElements) {
+                    if (element && element.children.length === 0 && element.textContent) { // Only text nodes
+                        const originalText = element.textContent.trim();
+                        const processedText = processTextForPrices(originalText);
+                        
+                        if (originalText !== processedText && originalText.match(/[\d.,]+/)) {
+                            console.log(`Price Rounder: Amazon universal "${originalText}" → "${processedText}"`);
+                            
+                            if (!originalPrices.has(element)) {
+                                originalPrices.set(element, {
+                                    type: 'amazon-universal',
+                                    text: originalText
+                                });
+                            }
+                            
+                            element.textContent = processedText;
+                            processed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn('Price Rounder: Error in processAmazonPrice:', error);
+        }
+        
+        return processed;
+    }
+    
+    // Helper function to update Amazon visual elements based on processed offscreen text
+    function updateAmazonVisualElements(priceElement, processedText, config) {
+        // Extract price information from processed text
+        const priceMatch = processedText.match(/([^\d]*)([\d,]+)\.(\d{2})/);
+        if (!priceMatch) return;
+        
+        const [, symbol, wholePart, fractionPart] = priceMatch;
+        
+        // For rounded prices, we want to show whole dollars with 00 cents
+        const roundedPrice = parseFloat(`${wholePart}.${fractionPart}`);
+        const roundedWhole = Math.ceil(roundedPrice); // Round up to next whole dollar
+        
+        // Update visual elements if they exist
+        const symbolElement = priceElement.querySelector(config.symbol);
         const wholeElement = priceElement.querySelector(config.whole);
         const fractionElement = priceElement.querySelector(config.fraction);
-        const symbolElement = priceElement.querySelector(config.symbol);
-        const offscreenElement = priceElement.querySelector(config.offscreen);
         
-        if (wholeElement && fractionElement) {
-            const symbol = symbolElement ? symbolElement.textContent.trim() : '$';
-            const whole = wholeElement.textContent.replace(/[^\d]/g, '');
-            const fraction = fractionElement.textContent.replace(/[^\d]/g, '');
-            
-            if (whole && fraction) {
-                const originalPrice = parseFloat(`${whole}.${fraction}`);
-                const roundedPrice = getRoundedPrice(originalPrice);
-                const roundedWhole = Math.floor(roundedPrice);
-                const roundedFraction = "00"; // Always show 00 since we round to whole numbers
-                
-                console.log(`Price Rounder: Amazon ${symbol}${whole}.${fraction} → ${symbol}${roundedWhole}.${roundedFraction}`);
-                
-                // Store original for restoration
-                if (!originalPrices.has(priceElement)) {
-                    originalPrices.set(priceElement, {
-                        type: 'amazon',
-                        whole: wholeElement.textContent,
-                        fraction: fractionElement.textContent,
-                        offscreen: offscreenElement ? offscreenElement.textContent : null
-                    });
-                }
-                
-                // Update the displayed price
-                wholeElement.textContent = roundedWhole.toString();
-                fractionElement.textContent = roundedFraction;
-                
-                // Update offscreen price for accessibility
-                if (offscreenElement) {
-                    offscreenElement.textContent = `${symbol}${roundedPrice.toFixed(2)}`;
-                }
-                
-                return true;
-            }
+        if (symbolElement && symbol) {
+            symbolElement.textContent = symbol.trim();
         }
-        return false;
+        
+        if (wholeElement) {
+            // Always show the rounded whole number
+            wholeElement.textContent = roundedWhole.toString();
+        }
+        
+        if (fractionElement) {
+            // Always show 00 for rounded prices
+            fractionElement.textContent = "00";
+        }
+        
+        console.log(`Price Rounder: Amazon visual update ${symbol}${wholePart}.${fractionPart} → ${symbol}${roundedWhole}.00`);
     }
 
     // Temu price structure handler
     function processTemuPrice(priceElement) {
-        const config = ecommerceConfigs.temu.structure;
-        const priceTextElement = priceElement.querySelector(config.priceText);
-        const symbolElement = priceElement.querySelector(config.symbol);
-        const amountElement = priceElement.querySelector(config.amount);
-        
-        if (priceTextElement) {
-            const originalText = priceTextElement.textContent;
-            const processedText = processTextForPrices(originalText);
-            
-            if (originalText !== processedText) {
-                console.log(`Price Rounder: Temu "${originalText.trim()}" → "${processedText.trim()}"`);
-                
-                // Store original for restoration
-                if (!originalPrices.has(priceElement)) {
-                    originalPrices.set(priceElement, {
-                        type: 'temu',
-                        priceText: originalText,
-                        amount: amountElement ? amountElement.textContent : null
-                    });
-                }
-                
-                // Update the displayed price
-                priceTextElement.textContent = processedText;
-                
-                // Update amount element if it exists
-                if (amountElement) {
-                    const processedAmount = processTextForPrices(amountElement.textContent);
-                    if (amountElement.textContent !== processedAmount) {
-                        amountElement.textContent = processedAmount;
-                    }
-                }
-                
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // Generic price handler for other e-commerce sites
-    function processGenericPrice(priceElement) {
-        // Skip if already processed or marked
-        if (originalPrices.has(priceElement) || 
-            priceElement.classList.contains('price-rounder-processed') ||
-            priceElement.closest('.a-price') || 
-            priceElement.closest('[data-type="price"]')) {
+        // Safety check
+        if (!priceElement || !priceElement.parentNode) {
             return false;
         }
         
-        const text = priceElement.textContent;
-        if (text && /[\$€£¥₹₽₩₦]\s*\d+[\.,]\d{2}/.test(text)) {
-            const processedText = processTextForPrices(text);
-            if (text !== processedText) {
-                console.log(`Price Rounder: Generic "${text.trim()}" → "${processedText.trim()}"`);
+        const config = ecommerceConfigs.temu.structure;
+        let processed = false;
+        
+        try {
+            // Strategy 1: Try structured Temu elements
+            const priceTextElement = priceElement.querySelector(config.priceText);
+            const symbolElement = priceElement.querySelector(config.symbol);
+            const amountElement = priceElement.querySelector(config.amount);
+            
+            if (priceTextElement && priceTextElement.textContent) {
+                const originalText = priceTextElement.textContent.trim();
+                const processedText = processTextForPrices(originalText);
+                
+                if (originalText !== processedText) {
+                    console.log(`Price Rounder: Temu structured "${originalText}" → "${processedText}"`);
+                    
+                    if (!originalPrices.has(priceElement)) {
+                        originalPrices.set(priceElement, {
+                            type: 'temu',
+                            priceText: originalText,
+                            amount: amountElement && amountElement.textContent ? amountElement.textContent : null
+                        });
+                    }
+                    
+                    priceTextElement.textContent = processedText;
+                    
+                    if (amountElement && amountElement.textContent) {
+                        const processedAmount = processTextForPrices(amountElement.textContent);
+                        if (amountElement.textContent !== processedAmount) {
+                            amountElement.textContent = processedAmount;
+                        }
+                    }
+                    
+                    processed = true;
+                }
+            }
+            
+            // Strategy 2: Universal text processing on any child elements
+            if (!processed) {
+                const allTextElements = priceElement.querySelectorAll('*');
+                for (const element of allTextElements) {
+                    if (element && element.children.length === 0 && element.textContent) { // Only leaf text nodes
+                        const originalText = element.textContent.trim();
+                        const processedText = processTextForPrices(originalText);
+                        
+                        // Check if this looks like a price and was changed
+                        if (originalText !== processedText && 
+                            originalText.match(/[\d.,]+/) && 
+                            originalText.length > 2) {
+                            
+                            console.log(`Price Rounder: Temu universal "${originalText}" → "${processedText}"`);
+                            
+                            if (!originalPrices.has(element)) {
+                                originalPrices.set(element, {
+                                    type: 'temu-universal',
+                                    text: originalText
+                                });
+                            }
+                            
+                            element.textContent = processedText;
+                            processed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Strategy 3: Direct processing of the main element if it contains price text
+            if (!processed && priceElement.textContent) {
+                const mainText = priceElement.textContent.trim();
+                const processedMainText = processTextForPrices(mainText);
+                
+                if (mainText !== processedMainText && 
+                    mainText.match(/[\d.,]+/) && 
+                    !priceElement.querySelector('*')) {
+                    
+                    console.log(`Price Rounder: Temu direct "${mainText}" → "${processedMainText}"`);
+                    
+                    if (!originalPrices.has(priceElement)) {
+                        originalPrices.set(priceElement, {
+                            type: 'temu-direct',
+                            text: mainText
+                        });
+                    }
+                    
+                    priceElement.textContent = processedMainText;
+                    processed = true;
+                }
+            }
+        } catch (error) {
+            console.warn('Price Rounder: Error in processTemuPrice:', error);
+        }
+        
+        return processed;
+    }
+
+    // Universal price handler for all e-commerce sites
+    function processGenericPrice(priceElement) {
+        // Safety check
+        if (!priceElement || !priceElement.parentNode) {
+            return false;
+        }
+        
+        // Skip if already processed
+        if (originalPrices.has(priceElement) || 
+            priceElement.classList.contains('price-rounder-processed')) {
+            return false;
+        }
+        
+        let processed = false;
+        
+        try {
+            // Strategy 1: Process direct text content
+            const directText = priceElement.textContent ? priceElement.textContent.trim() : '';
+            const processedDirectText = processTextForPrices(directText);
+            
+            if (directText !== processedDirectText && 
+                directText.match(/[\d.,]+/) && 
+                !priceElement.querySelector('*')) { // No child elements
+                
+                console.log(`Price Rounder: Generic direct "${directText}" → "${processedDirectText}"`);
                 
                 if (!originalPrices.has(priceElement)) {
                     originalPrices.set(priceElement, {
-                        type: 'generic',
-                        text: text
+                        type: 'generic-direct',
+                        text: directText
                     });
                 }
                 
-                priceElement.textContent = processedText;
+                priceElement.textContent = processedDirectText;
                 priceElement.classList.add('price-rounder-processed');
-                return true;
+                processed = true;
             }
+            
+            // Strategy 2: Process all text-containing child elements
+            if (!processed) {
+                const allTextElements = priceElement.querySelectorAll('*');
+                for (const element of allTextElements) {
+                    if (element && element.children.length === 0 && element.textContent) { // Only leaf text nodes
+                        const originalText = element.textContent.trim();
+                        const processedText = processTextForPrices(originalText);
+                        
+                        // Check if this looks like a price and was changed
+                        if (originalText !== processedText && 
+                            originalText.match(/[\d.,]+/) && 
+                            originalText.length > 1 &&
+                            !originalPrices.has(element)) {
+                            
+                            console.log(`Price Rounder: Generic child "${originalText}" → "${processedText}"`);
+                            
+                            originalPrices.set(element, {
+                                type: 'generic-child',
+                                text: originalText
+                            });
+                            
+                            element.textContent = processedText;
+                            processed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Strategy 3: Use broader text processing for any price-like content
+            if (!processed && priceElement.textContent) {
+                const allText = priceElement.textContent.trim();
+                if (allText.length > 2 && 
+                    (allText.match(/[\$€£¥₹₽₩₦]/) || 
+                     allText.match(/\d+[.,]\d{2}/) || 
+                     allText.match(/\b\d{2,4}\b/))) {
+                    
+                    const processedAllText = processTextForPrices(allText);
+                    if (allText !== processedAllText) {
+                        console.log(`Price Rounder: Generic universal "${allText}" → "${processedAllText}"`);
+                        
+                        if (!originalPrices.has(priceElement)) {
+                            originalPrices.set(priceElement, {
+                                type: 'generic-universal',
+                                text: allText
+                            });
+                        }
+                        
+                        try {
+                            priceElement.innerHTML = priceElement.innerHTML.replace(
+                                allText, processedAllText
+                            );
+                            processed = true;
+                        } catch (htmlError) {
+                            // Fallback to textContent if innerHTML fails
+                            priceElement.textContent = processedAllText;
+                            processed = true;
+                        }
+                    }
+                }
+            }
+            
+            if (processed && priceElement.classList) {
+                priceElement.classList.add('price-rounder-processed');
+            }
+        } catch (error) {
+            console.warn('Price Rounder: Error in processGenericPrice:', error);
         }
-        return false;
+        
+        return processed;
     }
 
     // Helper function to get rounded price based on mode
@@ -430,13 +893,25 @@
         console.log(`Price Rounder: Found ${textNodes.length} text nodes to process`);
         
         let processedCount = 0;
+        let sampleTexts = [];
         textNodes.forEach(node => {
             const originalText = node.textContent;
+            
+            // Collect sample texts that might contain prices for debugging
+            if (originalText && originalText.match(/[\d.,]+/) && originalText.length < 100) {
+                sampleTexts.push(originalText.trim());
+            }
+            
             processTextNode(node);
             if (originalText !== node.textContent) {
                 processedCount++;
             }
         });
+        
+        // Show sample texts for debugging (first 10)
+        if (sampleTexts.length > 0) {
+            console.log(`Price Rounder: Sample text content (first 10):`, sampleTexts.slice(0, 10));
+        }
         
         console.log(`Price Rounder: Processed ${processedCount} text price changes`);
     }
@@ -444,11 +919,16 @@
     // Function to restore original prices
     function restoreOriginalPrices() {
         originalPrices.forEach((originalData, element) => {
-            if (element.parentNode) {
+            // Check if element still exists in DOM
+            if (!element || !element.parentNode) {
+                return;
+            }
+            
+            try {
                 if (typeof originalData === 'string') {
                     // Legacy text node
                     element.textContent = originalData;
-                } else {
+                } else if (originalData && originalData.type) {
                     // Structured price data
                     switch (originalData.type) {
                         case 'amazon':
@@ -456,10 +936,29 @@
                             const fractionElement = element.querySelector('.a-price-fraction');
                             const offscreenElement = element.querySelector('.a-offscreen');
                             
-                            if (wholeElement) wholeElement.textContent = originalData.whole;
-                            if (fractionElement) fractionElement.textContent = originalData.fraction;
+                            // Restore offscreen element first (primary source of truth)
                             if (offscreenElement && originalData.offscreen) {
                                 offscreenElement.textContent = originalData.offscreen;
+                            }
+                            
+                            // Restore visual elements if they were stored
+                            if (originalData.whole && wholeElement) {
+                                wholeElement.textContent = originalData.whole;
+                            }
+                            if (originalData.fraction && fractionElement) {
+                                fractionElement.textContent = originalData.fraction;
+                            }
+                            break;
+                            
+                        case 'amazon-universal':
+                        case 'temu-universal':
+                        case 'temu-direct':
+                        case 'generic-direct':
+                        case 'generic-child':
+                        case 'generic-universal':
+                            // Universal text restoration
+                            if (originalData.text) {
+                                element.textContent = originalData.text;
                             }
                             break;
                             
@@ -467,20 +966,35 @@
                             const priceTextElement = element.querySelector('._2XgTiMJi');
                             const amountElement = element.querySelector('._2de9ERAH');
                             
-                            if (priceTextElement) priceTextElement.textContent = originalData.priceText;
+                            if (priceTextElement && originalData.priceText) {
+                                priceTextElement.textContent = originalData.priceText;
+                            }
                             if (amountElement && originalData.amount) {
                                 amountElement.textContent = originalData.amount;
                             }
                             break;
                             
                         case 'generic':
-                            element.textContent = originalData.text;
+                            if (originalData.text) {
+                                element.textContent = originalData.text;
+                            }
+                            break;
+                            
+                        default:
+                            // Fallback for any unrecognized types
+                            if (originalData.text) {
+                                element.textContent = originalData.text;
+                            }
                             break;
                     }
                 }
                 
-                // Remove processing marker
-                element.classList.remove('price-rounder-processed');
+                // Remove processing marker safely
+                if (element.classList && typeof element.classList.remove === 'function') {
+                    element.classList.remove('price-rounder-processed');
+                }
+            } catch (error) {
+                console.warn('Price Rounder: Error restoring element:', error);
             }
         });
         originalPrices.clear();
@@ -590,4 +1104,5 @@
                 processPricesOnPage();
             }
         }, 1000);
-    });})();
+    });
+})();

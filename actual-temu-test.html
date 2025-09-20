@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actual Temu Price Format Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .temu-item { 
+            background: white; 
+            padding: 15px; 
+            margin: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px;
+            display: inline-block;
+            width: 250px;
+            vertical-align: top;
+        }
+        .price-section { margin: 10px 0; }
+        .current-price { 
+            color: #ff4444; 
+            font-weight: bold; 
+            font-size: 18px;
+        }
+        .original-price { 
+            color: #999; 
+            text-decoration: line-through; 
+            font-size: 14px;
+        }
+        .sold-count { color: #666; font-size: 12px; }
+        .save-amount { color: #ff6600; font-size: 12px; }
+        .deal-badge { background: #ff4444; color: white; padding: 2px 6px; font-size: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Actual Temu Price Format Test</h1>
+    <p>Testing the exact price formats shown in the Temu screenshot</p>
+
+    <!-- Exact format from screenshot -->
+    <div class="temu-item">
+        <h4>Elegant Red Lace-Trimmed M...</h4>
+        <div class="price-section">
+            <div class="current-price">₦29,133</div>
+            <div class="sold-count">🔥 1.5K+ sold</div>
+            <div class="save-amount">💰 Save ₦5145.00...</div>
+        </div>
+        <div class="deal-badge">Best-Selling Item</div>
+    </div>
+
+    <div class="temu-item">
+        <span class="deal-badge">SHOPPING DEALS</span>
+        <h4>Women's Elegant T...</h4>
+        <div class="price-section">
+            <div class="current-price">₦22,516</div>
+            <div class="original-price">₦46645.00</div>
+            <div class="sold-count">🔥 Save ₦630.00...</div>
+        </div>
+        <div class="deal-badge">ONLY 5 LEFT</div>
+    </div>
+
+    <div class="temu-item">
+        <span class="deal-badge">SHOPPING DEALS</span>
+        <h4>Print Painting, 1pc ...</h4>
+        <div class="price-section">
+            <div class="current-price">₦3,218</div>
+            <div class="sold-count">🔥 3.6K+ sold</div>
+            <div class="save-amount">ONLY 11 LEFT</div>
+        </div>
+        <div class="deal-badge">⭐⭐⭐⭐⭐ 160</div>
+    </div>
+
+    <!-- More realistic Temu-style elements -->
+    <div class="temu-item">
+        <h4>Fashion Item</h4>
+        <div class="price-section">
+            <span class="current-price">₦15,999</span>
+            <span class="original-price">₦25,999</span>
+        </div>
+    </div>
+
+    <div class="temu-item">
+        <h4>Electronics</h4>
+        <div class="price-section">
+            <div class="current-price">₦8,499</div>
+            <div class="save-amount">Save ₦2,000</div>
+        </div>
+    </div>
+
+    <div class="temu-item">
+        <h4>Home & Garden</h4>
+        <div class="price-section">
+            <span class="current-price">₦1,299</span>
+            <span class="sold-count">500+ sold</span>
+        </div>
+    </div>
+
+    <!-- Test various Naira formats -->
+    <div class="temu-item">
+        <h4>Various Formats</h4>
+        <div class="price-section">
+            <div>Price: ₦12,999</div>
+            <div>Sale: ₦9,999</div>
+            <div>Was: ₦15,999</div>
+            <div>Now: ₦7,499</div>
+            <div>From: ₦2,999</div>
+            <div>Only: ₦1,899</div>
+        </div>
+    </div>
+
+    <!-- Test dynamic content -->
+    <div id="dynamic-container"></div>
+
+    <script>
+        // Add dynamic Temu-style prices
+        function addDynamicPrice() {
+            const container = document.getElementById('dynamic-container');
+            const item = document.createElement('div');
+            item.className = 'temu-item';
+            
+            const randomPrice = Math.floor(Math.random() * 50000) + 1000;
+            const formattedPrice = randomPrice.toLocaleString('en-NG');
+            
+            item.innerHTML = `
+                <h4>Dynamic Item</h4>
+                <div class="price-section">
+                    <div class="current-price">₦${formattedPrice}</div>
+                    <div class="sold-count">${Math.floor(Math.random() * 5)}K+ sold</div>
+                </div>
+            `;
+            
+            container.appendChild(item);
+        }
+
+        // Add a few dynamic items
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => addDynamicPrice(), i * 1000);
+        }
+
+        // Test button
+        const button = document.createElement('button');
+        button.textContent = 'Add More Temu Items';
+        button.onclick = addDynamicPrice;
+        button.style.margin = '20px';
+        button.style.padding = '10px';
+        document.body.appendChild(button);
+    </script>
+</body>
+</html>

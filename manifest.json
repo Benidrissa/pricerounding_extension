@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Price Rounder",
-      "version": "1.4.1",
+      "version": "1.4.3",
   "description": "Rounds confusing price endings UP (like $9.99 → $10.00) to show honest higher prices on e-commerce websites",
   "permissions": [
     "activeTab",
@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["content-simple.js"],
       "run_at": "document_end"
     }
   ],
