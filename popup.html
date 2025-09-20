@@ -37,8 +37,12 @@
             background: rgba(255,255,255,0.1);
             padding: 15px;
             border-radius: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             backdrop-filter: blur(10px);
+        }
+
+        .toggle-container:last-of-type {
+            margin-bottom: 20px;
         }
 
         .toggle-label {
@@ -205,6 +209,16 @@
     <div class="toggle-container">
         <span class="toggle-label">Round Prices</span>
         <div class="toggle-switch" id="toggleSwitch">
+            <div class="toggle-slider"></div>
+        </div>
+    </div>
+
+    <div class="toggle-container">
+        <div>
+            <div class="toggle-label">E-commerce Mode</div>
+            <div style="font-size: 11px; opacity: 0.7; margin-top: 2px;">Amazon, Temu, eBay structures</div>
+        </div>
+        <div class="toggle-switch" id="ecommerceToggle">
             <div class="toggle-slider"></div>
         </div>
     </div>
